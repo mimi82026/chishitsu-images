@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地質調査技士 フラッシュカード R3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+    --accent:#4f8ef7; --accent2:#7c5af7; --correct:#22c55e; --wrong:#ef4444;
+    --text:#e8ecf4; --text2:#8892aa; --text3:#555e7a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+  header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--surface);flex-shrink:0;}
+  .logo{font-family:'Space Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:1px;}
+  .logo span{color:var(--text2);font-size:11px;}
+  .header-stats{display:flex;gap:16px;font-size:12px;color:var(--text2);}
+  .header-stats strong{font-size:15px;}
+
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 16px;flex-shrink:0;}
+  .tab-btn{padding:11px 16px;background:none;border:none;color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px;}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-btn:hover:not(.active){color:var(--text);}
+
+  .view{display:none;flex:1;overflow-y:auto;min-height:0;}
+  .view.active{display:flex;flex-direction:column;}
+
+  /* ── Study ── */
+  #view-study{align-items:center;padding:16px;gap:14px;}
+
+  .study-controls{width:100%;max-width:860px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .mode-select{display:flex;gap:8px;flex-wrap:wrap;}
+  .mode-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;}
+  .mode-btn.active{background:var(--accent);border-color:var(--accent);color:white;}
+  .progress-text{font-size:13px;color:var(--text2);white-space:nowrap;}
+  .progress-text strong{color:var(--text);font-size:15px;}
+
+  .progress-bar-wrap{width:100%;max-width:860px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease;}
+
+  .card-outer{width:100%;max-width:860px;}
+
+  .card-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;}
+  .card-topbar-left{display:flex;align-items:center;gap:10px;}
+  .card-panel-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);}
+  .card-qnum{display:inline-block;background:var(--accent);color:white;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Space Mono',monospace;}
+  .card-qnum.answer-mode{background:rgba(34,197,94,.25);color:var(--correct);}
+
+  .view-toggle-btns{display:none;gap:6px;}
+  .view-toggle-btns.visible{display:flex;}
+  .toggle-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .toggle-btn.active{background:var(--surface);color:var(--text);border-color:var(--accent);}
+  .toggle-btn:hover:not(.active){color:var(--text);}
+
+  .card-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;width:100%;}
+  .card-panel.answer-mode{background:var(--surface2);border-color:rgba(34,197,94,.25);}
+  .answer-badge{display:none;color:var(--correct);font-size:12px;font-weight:700;margin-bottom:12px;}
+  .answer-badge.visible{display:block;}
+  .card-img{width:100%;border-radius:8px;border:1px solid var(--border);display:block;cursor:zoom-in;transition:opacity .2s;}
+  .card-img:hover{opacity:.92;}
+  .card-hint{text-align:center;font-size:13px;color:var(--text3);margin-top:16px;padding:12px 16px;border:1px dashed var(--border);border-radius:10px;cursor:pointer;transition:all .2s;}
+  .card-hint:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,142,247,.05);}
+
+  .answer-actions{width:100%;max-width:860px;display:none;flex-direction:column;gap:10px;}
+  .answer-actions.visible{display:flex;}
+
+  /* 3-col: 正解 / 不正解 / スキップ */
+  .judge-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .answer-btn{padding:14px 10px;border-radius:12px;border:1px solid;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+  .btn-correct{background:rgba(34,197,94,.1);border-color:var(--correct);color:var(--correct);}
+  .btn-correct:hover{background:rgba(34,197,94,.22);}
+  .btn-wrong{background:rgba(239,68,68,.1);border-color:var(--wrong);color:var(--wrong);}
+  .btn-wrong:hover{background:rgba(239,68,68,.22);}
+  .btn-skip{background:var(--surface);border-color:var(--border);color:var(--text2);font-size:13px;}
+  .btn-skip:hover{background:var(--surface2);color:var(--text);}
+
+  /* ── Complete / Grade screen ── */
+  .complete-card{width:100%;max-width:700px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;display:none;}
+  .complete-card.visible{display:block;}
+  .complete-icon{font-size:48px;margin-bottom:14px;}
+  .complete-title{font-size:22px;font-weight:900;margin-bottom:6px;}
+  .complete-sub{color:var(--text2);font-size:13px;margin-bottom:24px;}
+  .complete-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+  .cstat{background:var(--surface2);border-radius:10px;padding:16px;}
+  .cstat-val{font-size:28px;font-weight:900;margin-bottom:4px;}
+  .cstat-label{font-size:11px;color:var(--text2);}
+
+  .grade-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;border-radius:12px;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .2s;}
+  .grade-btn:hover{opacity:.9;}
+  .primary-btn{background:var(--accent);color:white;border:none;border-radius:10px;padding:13px 24px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;transition:opacity .2s;}
+  .primary-btn:hover{opacity:.9;}
+  .secondary-btn{background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:10px;padding:13px 24px;font-family:'Noto Sans JP',sans-serif;font-size:14px;cursor:pointer;width:100%;transition:all .2s;}
+  .secondary-btn:hover{color:var(--text);}
+
+  /* ── List View ── */
+  #view-list{padding:0;}
+  .list-container{padding:20px;max-width:1000px;width:100%;margin:0 auto;}
+  .list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .list-title{font-size:16px;font-weight:700;}
+  .filter-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;font-family:'Noto Sans JP',sans-serif;}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:white;}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+  .list-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;}
+  .list-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .list-card-img{width:100%;height:120px;object-fit:cover;object-position:top;display:block;}
+  .list-card-body{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;}
+  .list-card-num{font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);}
+  .list-card-status{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+  .status-correct{background:rgba(34,197,94,.15);color:var(--correct);}
+  .status-wrong{background:rgba(239,68,68,.15);color:var(--wrong);}
+  .status-unanswered{background:rgba(255,255,255,.05);color:var(--text3);}
+
+  /* ── Modal ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;overflow-y:auto;padding:20px;}
+  .modal-overlay.open{display:block;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:860px;margin:0 auto;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;border-radius:16px 16px 0 0;gap:12px;}
+  .modal-title{font-size:14px;font-weight:700;color:var(--accent);}
+  .modal-nav{display:flex;gap:8px;align-items:center;}
+  .modal-toggle-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .modal-toggle-btn.active{background:var(--surface);border-color:var(--accent);color:var(--text);}
+  .modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;}
+  .modal-close:hover{color:var(--text);}
+  .modal-img{width:100%;display:block;border-radius:0 0 14px 14px;}
+  .modal-answer-header{padding:10px 20px;background:rgba(34,197,94,.06);border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;color:var(--correct);font-weight:700;}
+
+  /* ── Stats View ── */
+  #view-stats{padding:0;}
+  .stats-container{padding:20px;max-width:860px;width:100%;margin:0 auto;}
+
+  /* Grade history */
+  .grade-history-section{margin-bottom:28px;}
+  .section-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .section-badge{font-size:11px;font-weight:400;color:var(--text2);}
+
+  .grade-record{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;}
+  .grade-record-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+  .grade-record-title{font-size:13px;font-weight:700;}
+  .grade-record-meta{font-size:11px;color:var(--text2);}
+  .grade-mode-tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-left:6px;}
+  .tag-all{background:rgba(79,142,247,.15);color:var(--accent);}
+  .tag-wrong{background:rgba(239,68,68,.15);color:var(--wrong);}
+
+  .grade-cat-table{width:100%;border-collapse:collapse;}
+  .grade-cat-table th,.grade-cat-table td{padding:7px 10px;text-align:left;font-size:12px;border-bottom:1px solid var(--border);}
+  .grade-cat-table th{color:var(--text2);font-weight:400;}
+  .grade-cat-table tr:last-child td{border-bottom:none;}
+  .score-cell{font-family:'Space Mono',monospace;font-weight:700;text-align:right;}
+  .score-pct{font-size:11px;color:var(--text2);margin-left:6px;}
+
+  .total-row td{background:var(--surface2);font-weight:700;}
+
+  /* Current stats (live) */
+  .current-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+  .stats-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+  .stats-val{font-size:34px;font-weight:900;margin-bottom:4px;}
+  .stats-label{font-size:12px;color:var(--text2);}
+
+  .empty-msg{color:var(--text3);font-size:13px;text-align:center;padding:24px 0;}
+
+  .reset-btn{background:rgba(239,68,68,.1);border:1px solid var(--wrong);color:var(--wrong);border-radius:8px;padding:10px 20px;font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;}
+  .reset-btn:hover{background:rgba(239,68,68,.2);}
+
+  /* Lightbox */
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:300;align-items:center;justify-content:center;cursor:zoom-out;}
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:6px;}
+
+
+
+  @media(max-width:600px){
+    .judge-row{grid-template-columns:1fr 1fr;}
+    .btn-skip{grid-column:span 2;}
+    .card-grid{grid-template-columns:1fr 1fr;}
+    .bar-label{min-width:70px;}
+  }
+  @media(max-width:380px){
+    .card-grid{grid-template-columns:1fr;}
+    .mode-btn{font-size:11px;padding:5px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">地質調査技士 <span>令和3年度 全100問</span></div>
+  <div class="header-stats">
+      <span>正解 <strong id="h-correct" style="color:var(--correct)">0</strong></span>
+      <span>不正解 <strong id="h-wrong" style="color:var(--wrong)">0</strong></span>
+      <span>未回答 <strong id="h-unanswered" style="color:var(--text2)">100</strong></span>
+    </div>
+
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('study')">📚 学習</button>
+  <button class="tab-btn" onclick="switchTab('list')">📋 一覧</button>
+  <button class="tab-btn" onclick="switchTab('stats')">📊 成績</button>
+</div>
+
+<!-- ── Study View ── -->
+<div class="view active" id="view-study">
+
+  <div class="study-controls">
+    <div class="mode-select">
+      <button class="mode-btn active" id="mode-all"        onclick="setMode('all')">全問</button>
+      <button class="mode-btn"        id="mode-wrong"      onclick="setMode('wrong')">不正解のみ</button>
+      <button class="mode-btn"        id="mode-unanswered" onclick="setMode('unanswered')">未回答のみ</button>
+    </div>
+    <div class="progress-text">
+      <strong id="prog-cur">1</strong> / <strong id="prog-total">100</strong>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Card -->
+  <div class="card-outer" id="card-outer">
+    <div class="card-topbar">
+      <div class="card-topbar-left">
+        <span class="card-panel-label" id="panel-label">QUESTION</span>
+        <span class="card-qnum" id="card-qnum">Q001</span>
+      </div>
+      <div class="view-toggle-btns" id="view-toggle-btns">
+        <button class="toggle-btn" id="btn-show-q" onclick="showQuestionView()">← 問題へ</button>
+        <button class="toggle-btn active" id="btn-show-a" onclick="showAnswerView()">解説へ →</button>
+      </div>
+    </div>
+    <div class="card-panel" id="card-panel">
+      <div class="answer-badge" id="answer-badge">✓ 解答・解説</div>
+      <img class="card-img" id="card-img" src="" alt="" onclick="openLightbox(this.src)">
+      <div class="card-hint" id="card-hint" onclick="revealAnswer()">👆 タップして解答・解説を表示</div>
+    </div>
+  </div>
+
+  <!-- Answer actions: 正解 / 不正解 / スキップ -->
+  <div class="answer-actions" id="answer-actions">
+    <div class="judge-row">
+      <button class="answer-btn btn-correct" onclick="markAnswer(true)">✓ 正解</button>
+      <button class="answer-btn btn-wrong"   onclick="markAnswer(false)">✗ 不正解</button>
+      <button class="answer-btn btn-skip"    onclick="skipCard()">→ スキップ</button>
+    </div>
+  </div>
+
+  <!-- Complete screen -->
+  <div class="complete-card" id="complete-card">
+    <div class="complete-icon" id="complete-icon">🎉</div>
+    <div class="complete-title" id="complete-title">セッション完了！</div>
+    <div class="complete-sub" id="complete-sub"></div>
+    <div class="complete-stats">
+      <div class="cstat"><div class="cstat-val" id="cs-correct" style="color:var(--correct)">0</div><div class="cstat-label">正解</div></div>
+      <div class="cstat"><div class="cstat-val" id="cs-wrong"   style="color:var(--wrong)">0</div><div class="cstat-label">不正解</div></div>
+      <div class="cstat"><div class="cstat-val" id="cs-skip"    style="color:var(--text2)">0</div><div class="cstat-label">スキップ</div></div>
+      <div class="cstat"><div class="cstat-val" id="cs-rate"    style="color:var(--accent)">—</div><div class="cstat-label">正答率</div></div>
+    </div>
+    <!-- 成績を付けるボタン -->
+    <button class="grade-btn" id="grade-btn" onclick="commitGrade()">📋 成績を付ける</button>
+    <button class="primary-btn"   id="retry-wrong-btn" onclick="setMode('wrong')">不正解のみ再挑戦</button>
+    <button class="secondary-btn" onclick="setMode('all')">全問やり直し</button>
+  </div>
+
+</div>
+
+<!-- ── List View ── -->
+<div class="view" id="view-list">
+  <div class="list-container">
+    <div class="list-header">
+      <div class="list-title">問題一覧（全100問）</div>
+      <div class="filter-btns">
+        <button class="filter-btn active" id="f-all"        onclick="filterList('all')">すべて</button>
+        <button class="filter-btn"        id="f-correct"    onclick="filterList('correct')">正解</button>
+        <button class="filter-btn"        id="f-wrong"      onclick="filterList('wrong')">不正解</button>
+        <button class="filter-btn"        id="f-unanswered" onclick="filterList('unanswered')">未回答</button>
+      </div>
+    </div>
+    <div class="card-grid" id="card-grid"></div>
+  </div>
+</div>
+
+<!-- ── Stats View ── -->
+<div class="view" id="view-stats">
+  <div class="stats-container">
+
+    <!-- Current live stats -->
+    <div class="section-title">現在の状況</div>
+    <div class="current-stats-grid">
+      <div class="stats-card"><div class="stats-val" id="st-answered">0</div><div class="stats-label">回答済み</div></div>
+      <div class="stats-card"><div class="stats-val" id="st-correct" style="color:var(--correct)">0</div><div class="stats-label">正解数</div></div>
+      <div class="stats-card"><div class="stats-val" id="st-wrong"   style="color:var(--wrong)">0</div><div class="stats-label">不正解数</div></div>
+      <div class="stats-card"><div class="stats-val" id="st-rate"    style="color:var(--accent)">—</div><div class="stats-label">正答率</div></div>
+    </div>
+
+    <!-- Grade history -->
+    <div class="grade-history-section">
+      <div class="section-title">成績記録 <span class="section-badge" id="grade-count-badge"></span></div>
+      <div id="grade-history-list"></div>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="reset-btn" onclick="resetAll()">⚠ 全記録をリセット</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal ── -->
+<div class="modal-overlay" id="modal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">問1</div>
+      <div class="modal-nav">
+        <button class="modal-toggle-btn active" id="modal-btn-q" onclick="modalShowQ()">問題</button>
+        <button class="modal-toggle-btn"        id="modal-btn-a" onclick="modalShowA()">解説</button>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div id="modal-q-section"><img id="modal-q-img" class="modal-img" src="" alt="問題" onclick="openLightbox(this.src)" style="cursor:zoom-in"></div>
+    <div id="modal-a-section" style="display:none">
+      <div class="modal-answer-header">✓ 解答・解説</div>
+      <img id="modal-a-img" class="modal-img" src="" alt="解説" onclick="openLightbox(this.src)" style="cursor:zoom-in">
+    </div>
+  </div>
+</div>
+
+<!-- ── Sync toast ── -->
+<div id="sync-toast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-size:12px;color:var(--text2);z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:opacity .3s;pointer-events:none;"></div>
+
+<!-- ── Lightbox ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+/* ─────────────────────────────────────────
+   Image loader — GitHub Pages URL方式
+   画像はGitHub Pagesから直接URLで読み込む
+   base64データは不要、ファイルサイズ極小
+───────────────────────────────────────── */
+const GITHUB_BASE = 'GITHUB_BASE_PLACEHOLDER';
+
+function getPage(n) {
+  return `${GITHUB_BASE}/${String(n).padStart(3,'0')}.jpg`;
+}
+
+// GitHub Pages方式ではprefetchは不要（URLを返すだけ）
+function prefetchAround(cardId) {
+  // preload next card's images for smoother transitions
+  [-1, 0, 1].forEach(offset => {
+    const id = cardId + offset;
+    if (id >= 1 && id <= 100) {
+      [qPage(id), aPage(id)].forEach(n => {
+        const img = new Image();
+        img.src = getPage(n);
+      });
+    }
+  });
+}
+
+/* ─────────────────────────────────────────
+   Firebase setup
+───────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyCsg7DIijPKjBYqnqgORvlaJRFZQzigd4E",
+  authDomain: "chishitsu-flashcard.firebaseapp.com",
+  databaseURL: "https://chishitsu-flashcard-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chishitsu-flashcard",
+  storageBucket: "chishitsu-flashcard.firebasestorage.app",
+  messagingSenderId: "31629157067",
+  appId: "1:31629157067:web:21ab0c0f2bf81f4d64f14e"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// Single user key — all devices share this path
+const DB_PATH = 'user/r3';
+const dbRef   = ref(db, DB_PATH);
+
+/* ─────────────────────────────────────────
+   Toast helper
+───────────────────────────────────────── */
+let toastTimer = null;
+function showToast(msg, color='var(--text2)') {
+  const el = document.getElementById('sync-toast');
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = 'block';
+  el.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => { el.style.display='none'; }, 300);
+  }, 2500);
+}
+
+/* ─────────────────────────────────────────
+   Constants
+───────────────────────────────────────── */
+const CARD_IDS = Array.from({length:100},(_,i)=>i+1);
+const CATEGORIES = [
+  {label:'Ⅰ. 社会一般、行政、入札契約等（16問）', ids:Array.from({length:16},(_,i)=>i+1)},
+  {label:'Ⅱ. 地質、測量、土木、建築等の知識（12問）', ids:Array.from({length:12},(_,i)=>i+17)},
+  {label:'Ⅲ. 現場技術の知識（38問）', ids:Array.from({length:38},(_,i)=>i+29)},
+  {label:'Ⅳ. 調査技術の理解度（12問）', ids:Array.from({length:12},(_,i)=>i+67)},
+  {label:'Ⅴ. 解析手法、設計・施工への適用（12問）', ids:Array.from({length:12},(_,i)=>i+79)},
+  {label:'Ⅵ. 管理技法（10問）', ids:Array.from({length:10},(_,i)=>i+91)},
+];
+function qPage(id){return(id-1)*2+1;}
+function aPage(id){return(id-1)*2+2;}
+
+/* ─────────────────────────────────────────
+   State — all backed by Firebase
+───────────────────────────────────────── */
+let results        = {};
+let gradeHistory   = [];
+let resumeState    = null;
+
+let queue          = [];
+let queueIdx       = 0;
+let sessionMode    = 'all';
+let revealed       = false;
+let viewingQ       = true;
+let currentId      = null;
+let sessionAnswers = {};
+
+let fbLoaded = false;  // true after first Firebase load
+
+/* ─────────────────────────────────────────
+   Firebase save (debounced 800ms) + localStorage mirror
+───────────────────────────────────────── */
+let saveTimer = null;
+function scheduleSave() {
+  lsSave();  // save to localStorage immediately (instant, no network)
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ pushToFirebase(); }, 800);
+}
+
+async function pushToFirebase() {
+  try {
+    await set(dbRef, { results, gradeHistory, resumeState });
+    showToast('☁ 同期済み', 'var(--correct)');
+  } catch(e) {
+    showToast('⚠ 同期エラー', 'var(--wrong)');
+    console.error('Firebase save error:', e);
+  }
+}
+
+/* ─────────────────────────────────────────
+   localStorage keys (per year via DB_PATH)
+───────────────────────────────────────── */
+const LS_KEY = 'gfFlash_' + DB_PATH.replace(/\//g,'_');
+
+function lsSave() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({results, gradeHistory, resumeState})); } catch(e) {}
+}
+function lsLoad() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (d) {
+      results      = d.results      || {};
+      gradeHistory = d.gradeHistory || [];
+      resumeState  = d.resumeState  || null;
+    }
+  } catch(e) {}
+}
+
+/* ─────────────────────────────────────────
+   Step 1: Start immediately from localStorage
+───────────────────────────────────────── */
+lsLoad();
+updateHeaderStats();
+startSession();  // show card right away — no waiting for Firebase
+
+function startSession() {
+  if (resumeState && resumeState.queue && resumeState.queue.length > 0 &&
+      resumeState.queueIdx < resumeState.queue.length) {
+    sessionMode    = resumeState.mode || 'all';
+    queue          = resumeState.queue;
+    queueIdx       = resumeState.queueIdx;
+    sessionAnswers = resumeState.sessionAnswers || {};
+    ['all','wrong','unanswered'].forEach(m =>
+      document.getElementById('mode-'+m).classList.toggle('active', m===sessionMode));
+    showCard(queue[queueIdx]);
+  } else {
+    buildQueue('all');
+    showCard(queue[0]);
+  }
+}
+
+/* ─────────────────────────────────────────
+   Step 2: Firebase sync in background
+   — updates data silently without disrupting current card
+───────────────────────────────────────── */
+showToast('☁ 同期中...', 'var(--text2)');
+
+onValue(dbRef, (snapshot) => {
+  const data = snapshot.val();
+  if (!data) {
+    // Firebase is empty — push local data up
+    showToast('☁ 同期済み', 'var(--correct)');
+    scheduleSave();
+    return;
+  }
+
+  if (!fbLoaded) {
+    fbLoaded = true;
+    // Compare Firebase vs localStorage: use whichever has more progress
+    const fbAnswered  = Object.keys(data.results || {}).length;
+    const lsAnswered  = Object.keys(results).length;
+
+    if (fbAnswered > lsAnswered) {
+      // Firebase has more data — use it and restart session
+      results      = data.results      || {};
+      gradeHistory = data.gradeHistory || [];
+      resumeState  = data.resumeState  || null;
+      lsSave();
+      updateHeaderStats();
+      showToast('☁ クラウドから最新データを読み込みました', 'var(--accent)');
+      // Restart session with Firebase data
+      sessionAnswers = {};
+      startSession();
+    } else {
+      // Local is up to date or equal
+      showToast('☁ 同期済み', 'var(--correct)');
+      // Push local up to Firebase if needed
+      if (lsAnswered >= fbAnswered) scheduleSave();
+    }
+  } else {
+    // Subsequent real-time push from another device
+    const fbAnswered = Object.keys(data.results || {}).length;
+    const lsAnswered = Object.keys(results).length;
+    if (fbAnswered > lsAnswered) {
+      results      = data.results      || {};
+      gradeHistory = data.gradeHistory || [];
+      lsSave();
+      updateHeaderStats();
+      showToast('☁ 別のデバイスと同期しました', 'var(--accent2)');
+    }
+  }
+}, (error) => {
+  console.error('Firebase read error:', error);
+  showToast('⚠ オフラインで動作中', 'var(--text2)');
+});
+
+/* ─────────────────────────────────────────
+   Header stats
+───────────────────────────────────────── */
+function updateHeaderStats() {
+  const v = Object.values(results);
+  const c = v.filter(x=>x==='correct').length;
+  const w = v.filter(x=>x==='wrong').length;
+  document.getElementById('h-correct').textContent    = c;
+  document.getElementById('h-wrong').textContent      = w;
+  document.getElementById('h-unanswered').textContent = 100-c-w;
+}
+
+/* ─────────────────────────────────────────
+   Queue building
+───────────────────────────────────────── */
+function buildQueue(mode) {
+  if (mode==='wrong') {
+    queue = CARD_IDS.filter(id=>results[id]==='wrong').sort((a,b)=>a-b);
+    if (!queue.length) queue = CARD_IDS.filter(id=>!results[id]).sort((a,b)=>a-b);
+    if (!queue.length) queue = [...CARD_IDS];
+  } else if (mode==='unanswered') {
+    queue = CARD_IDS.filter(id=>!results[id]).sort((a,b)=>a-b);
+    if (!queue.length) queue = [...CARD_IDS];
+  } else {
+    queue = [...CARD_IDS];
+  }
+  queueIdx = 0;
+}
+
+/* ─────────────────────────────────────────
+   Card display
+───────────────────────────────────────── */
+function showCard(id) {
+  currentId = id;
+  revealed  = false;
+  viewingQ  = true;
+
+  document.getElementById('card-outer').style.display = 'block';
+  document.getElementById('complete-card').classList.remove('visible');
+  document.getElementById('answer-actions').classList.remove('visible');
+  document.getElementById('view-toggle-btns').classList.remove('visible');
+
+  // Lazy-load: only keep current ±1 cards in memory
+  prefetchAround(id);
+  document.getElementById('card-img').src = getPage(qPage(id));
+  applyQuestionStyle();
+  document.getElementById('card-hint').style.display = 'block';
+
+  updateProgress();
+  // Save resume state to Firebase
+  resumeState = {mode: sessionMode, queue, queueIdx, sessionAnswers};
+  scheduleSave();
+}
+
+function updateProgress() {
+  const cur   = queueIdx + 1;
+  const total = queue.length;
+  document.getElementById('prog-cur').textContent   = cur;
+  document.getElementById('prog-total').textContent = total;
+  document.getElementById('prog-bar').style.width   = (total>0 ? (cur-1)/total*100 : 0)+'%';
+}
+
+function applyQuestionStyle() {
+  document.getElementById('panel-label').textContent = 'QUESTION';
+  document.getElementById('card-qnum').classList.remove('answer-mode');
+  document.getElementById('card-panel').classList.remove('answer-mode');
+  document.getElementById('answer-badge').classList.remove('visible');
+  document.getElementById('btn-show-q').classList.add('active');
+  document.getElementById('btn-show-a').classList.remove('active');
+}
+function applyAnswerStyle() {
+  document.getElementById('panel-label').textContent = 'ANSWER & EXPLANATION';
+  document.getElementById('card-qnum').classList.add('answer-mode');
+  document.getElementById('card-panel').classList.add('answer-mode');
+  document.getElementById('answer-badge').classList.add('visible');
+  document.getElementById('btn-show-q').classList.remove('active');
+  document.getElementById('btn-show-a').classList.add('active');
+}
+
+function revealAnswer() {
+  if (revealed) return;
+  revealed = true;
+  viewingQ = false;
+  document.getElementById('card-img').src = getPage(aPage(currentId));
+  document.getElementById('card-hint').style.display = 'none';
+  document.getElementById('view-toggle-btns').classList.add('visible');
+  document.getElementById('answer-actions').classList.add('visible');
+  applyAnswerStyle();
+}
+
+function showQuestionView() {
+  if (!revealed) return;
+  viewingQ = true;
+  document.getElementById('card-img').src = getPage(qPage(currentId));
+  applyQuestionStyle();
+  document.getElementById('card-hint').style.display = 'none';
+}
+function showAnswerView() {
+  if (!revealed) return;
+  viewingQ = false;
+  document.getElementById('card-img').src = getPage(aPage(currentId));
+  applyAnswerStyle();
+}
+
+/* ─────────────────────────────────────────
+   Scoring & navigation
+───────────────────────────────────────── */
+function markAnswer(correct) {
+  if (!currentId) return;
+  const val = correct ? 'correct' : 'wrong';
+  results[currentId] = val;
+  sessionAnswers[currentId] = val;
+  updateHeaderStats();
+  advanceQueue();
+}
+
+function skipCard() {
+  if (!currentId) return;
+  sessionAnswers[currentId] = 'skip';
+  advanceQueue();
+}
+
+function advanceQueue() {
+  queueIdx++;
+  if (queueIdx >= queue.length) { showComplete(); return; }
+  showCard(queue[queueIdx]);
+}
+
+/* ─────────────────────────────────────────
+   Complete screen
+───────────────────────────────────────── */
+function showComplete() {
+  resumeState = null;  // session finished
+  scheduleSave();
+
+  document.getElementById('card-outer').style.display = 'none';
+  document.getElementById('answer-actions').classList.remove('visible');
+  document.getElementById('complete-card').classList.add('visible');
+
+  const vals = Object.values(sessionAnswers);
+  const sc = vals.filter(x=>x==='correct').length;
+  const sw = vals.filter(x=>x==='wrong').length;
+  const ss = vals.filter(x=>x==='skip').length;
+  const answered = sc + sw;
+
+  document.getElementById('cs-correct').textContent = sc;
+  document.getElementById('cs-wrong').textContent   = sw;
+  document.getElementById('cs-skip').textContent    = ss;
+  document.getElementById('cs-rate').textContent    = answered>0 ? Math.round(sc/answered*100)+'%' : '—';
+
+  const modeLabel = sessionMode==='wrong' ? '不正解モード' : sessionMode==='unanswered' ? '未回答モード' : '全問モード';
+  document.getElementById('complete-title').textContent = 'セッション完了！';
+  document.getElementById('complete-sub').textContent   = `${modeLabel}　解答: ${answered}問 / スキップ: ${ss}問`;
+  document.getElementById('grade-btn').textContent      = `📋 成績を付ける（${modeLabel}）`;
+  document.getElementById('grade-btn').disabled         = false;
+  document.getElementById('grade-btn').style.opacity    = '1';
+  document.getElementById('retry-wrong-btn').style.display = sessionMode==='wrong' ? 'none' : 'block';
+}
+
+/* ─────────────────────────────────────────
+   Commit grade
+───────────────────────────────────────── */
+function commitGrade() {
+  const vals      = Object.values(sessionAnswers);
+  const sc        = vals.filter(x=>x==='correct').length;
+  const sw        = vals.filter(x=>x==='wrong').length;
+  const ss        = vals.filter(x=>x==='skip').length;
+  const answered  = sc+sw;
+  const modeLabel = sessionMode==='wrong' ? '不正解モード' : sessionMode==='unanswered' ? '未回答モード' : '全問モード';
+
+  const cats = CATEGORIES.map(cat => {
+    let c=0, w=0, sk=0;
+    cat.ids.forEach(id => {
+      const a = sessionAnswers[id];
+      if (a==='correct') c++;
+      else if (a==='wrong') w++;
+      else if (a==='skip') sk++;
+    });
+    return {label: cat.label, correct: c, wrong: w, skip: sk, answered: c+w};
+  });
+
+  gradeHistory.unshift({
+    date: new Date().toLocaleString('ja-JP'),
+    mode: sessionMode, modeLabel,
+    sessionCorrect: sc, sessionWrong: sw, sessionSkip: ss, sessionAnswered: answered,
+    cats,
+  });
+
+  document.getElementById('grade-btn').textContent = '✅ 成績を記録しました';
+  document.getElementById('grade-btn').disabled    = true;
+  document.getElementById('grade-btn').style.opacity = '0.6';
+
+  scheduleSave();
+}
+
+/* ─────────────────────────────────────────
+   Mode switch
+───────────────────────────────────────── */
+function setMode(mode) {
+  sessionMode    = mode;
+  sessionAnswers = {};
+  ['all','wrong','unanswered'].forEach(m =>
+    document.getElementById('mode-'+m).classList.toggle('active', m===mode));
+  buildQueue(mode);
+  if (!queue.length) { showComplete(); return; }
+  switchTab('study');
+  showCard(queue[0]);
+}
+
+/* ─────────────────────────────────────────
+   Tabs
+───────────────────────────────────────── */
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', ['study','list','stats'][i]===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if (name==='list')  renderList('all');
+  if (name==='stats') renderStats();
+}
+
+/* ─────────────────────────────────────────
+   List
+───────────────────────────────────────── */
+function filterList(f) {
+  ['all','correct','wrong','unanswered'].forEach(x =>
+    document.getElementById('f-'+x).classList.toggle('active', x===f));
+  renderList(f);
+}
+function renderList(f) {
+  let ids = CARD_IDS;
+  if (f==='correct')    ids = CARD_IDS.filter(id=>results[id]==='correct');
+  else if(f==='wrong')  ids = CARD_IDS.filter(id=>results[id]==='wrong');
+  else if(f==='unanswered') ids = CARD_IDS.filter(id=>!results[id]);
+  document.getElementById('card-grid').innerHTML = ids.map(id => {
+    const st = results[id]||'unanswered';
+    const lb = st==='correct'?'正解':st==='wrong'?'不正解':'未回答';
+    return `<div class="list-card" onclick="openModal(${id})">
+      <img class="list-card-img" src="${getPage(qPage(id))}" alt="問${id}" loading="lazy">
+      <div class="list-card-body">
+        <span class="list-card-num">問 ${id}</span>
+        <span class="list-card-status status-${st}">${lb}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────
+   Modal
+───────────────────────────────────────── */
+function openModal(id) {
+  document.getElementById('modal-title').textContent = `問 ${id}`;
+  document.getElementById('modal-q-img').src = getPage(qPage(id));
+  document.getElementById('modal-a-img').src = getPage(aPage(id));
+  modalShowQ();
+  document.getElementById('modal').classList.add('open');
+}
+function modalShowQ() {
+  document.getElementById('modal-q-section').style.display='block';
+  document.getElementById('modal-a-section').style.display='none';
+  document.getElementById('modal-btn-q').classList.add('active');
+  document.getElementById('modal-btn-a').classList.remove('active');
+}
+function modalShowA() {
+  document.getElementById('modal-q-section').style.display='none';
+  document.getElementById('modal-a-section').style.display='block';
+  document.getElementById('modal-btn-q').classList.remove('active');
+  document.getElementById('modal-btn-a').classList.add('active');
+}
+function closeModal()    { document.getElementById('modal').classList.remove('open'); }
+function closeModalBg(e) { if(e.target===document.getElementById('modal')) closeModal(); }
+
+/* ─────────────────────────────────────────
+   Lightbox
+───────────────────────────────────────── */
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+/* ─────────────────────────────────────────
+   Stats
+───────────────────────────────────────── */
+function renderStats() {
+  const v = Object.values(results);
+  const c = v.filter(x=>x==='correct').length;
+  const w = v.filter(x=>x==='wrong').length;
+  const a = c+w;
+  document.getElementById('st-answered').textContent = a;
+  document.getElementById('st-correct').textContent  = c;
+  document.getElementById('st-wrong').textContent    = w;
+  document.getElementById('st-rate').textContent     = a>0 ? Math.round(c/a*100)+'%' : '—';
+
+  const listEl = document.getElementById('grade-history-list');
+  document.getElementById('grade-count-badge').textContent = gradeHistory.length ? `（${gradeHistory.length}件）` : '';
+
+  if (!gradeHistory.length) {
+    listEl.innerHTML = '<div class="empty-msg">まだ成績の記録がありません。<br>問題を解き終えたら「成績を付ける」ボタンを押してください。</div>';
+    return;
+  }
+
+  listEl.innerHTML = gradeHistory.map((rec, idx) => {
+    const tagClass = rec.mode==='wrong' ? 'tag-wrong' : 'tag-all';
+    const rateStr  = rec.sessionAnswered>0 ? Math.round(rec.sessionCorrect/rec.sessionAnswered*100)+'%' : '—';
+    const catRows  = rec.cats.map(cat => {
+      const pct     = cat.answered>0 ? Math.round(cat.correct/cat.answered*100) : null;
+      const pctStr  = pct!==null ? `<span class="score-pct">(${pct}%)</span>` : '';
+      const skipStr = cat.skip>0 ? `<span style="font-size:10px;color:var(--text3);margin-left:4px">スキップ${cat.skip}</span>` : '';
+      return `<tr>
+        <td>${cat.label}</td>
+        <td class="score-cell" style="color:${cat.correct>0?'var(--correct)':'var(--text2)'}">
+          ${cat.correct}/${cat.answered}${pctStr}${skipStr}
+        </td>
+      </tr>`;
+    }).join('');
+    const totalPct  = rec.sessionAnswered>0 ? `<span class="score-pct">(${rateStr})</span>` : '';
+    const skipInfo  = rec.sessionSkip>0 ? `<span style="font-size:10px;color:var(--text3);margin-left:4px">スキップ${rec.sessionSkip}</span>` : '';
+    return `<div class="grade-record">
+      <div class="grade-record-header">
+        <div class="grade-record-title">第${gradeHistory.length - idx}回
+          <span class="grade-mode-tag ${tagClass}">${rec.modeLabel}</span>
+        </div>
+        <div class="grade-record-meta">${rec.date}</div>
+      </div>
+      <table class="grade-cat-table">
+        <thead><tr><th>カテゴリ</th><th style="text-align:right">正解/解答数</th></tr></thead>
+        <tbody>${catRows}
+          <tr class="total-row">
+            <td>合計</td>
+            <td class="score-cell">${rec.sessionCorrect}/${rec.sessionAnswered}${totalPct}${skipInfo}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────
+   Reset
+───────────────────────────────────────── */
+function resetAll() {
+  if (!confirm('全記録（回答履歴・成績）をリセットしますか？\nFirebase上のデータも削除されます。')) return;
+  results = {}; gradeHistory = []; resumeState = null;
+  updateHeaderStats();
+  sessionMode = 'all'; sessionAnswers = {};
+  ['all','wrong','unanswered'].forEach(m =>
+    document.getElementById('mode-'+m).classList.toggle('active', m==='all'));
+  scheduleSave();
+  buildQueue('all');
+  switchTab('study');
+  showCard(queue[0]);
+}
+
+// expose globals for onclick handlers
+window.switchTab    = switchTab;
+window.setMode      = setMode;
+window.revealAnswer = revealAnswer;
+window.showQuestionView = showQuestionView;
+window.showAnswerView   = showAnswerView;
+window.markAnswer   = markAnswer;
+window.skipCard     = skipCard;
+window.commitGrade  = commitGrade;
+window.filterList   = filterList;
+window.openModal    = openModal;
+window.modalShowQ   = modalShowQ;
+window.modalShowA   = modalShowA;
+window.closeModal   = closeModal;
+window.closeModalBg = closeModalBg;
+window.openLightbox = openLightbox;
+window.closeLightbox= closeLightbox;
+window.renderStats  = renderStats;
+window.resetAll     = resetAll;
+</script>
+</body>
+</html>
