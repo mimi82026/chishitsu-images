@@ -354,6 +354,7 @@ function resetAll(){if(!confirm('全記録をリセットしますか？'))retur
 
 lsLoad();updateHeaderStats();
 function startSession(){if(resumeState&&resumeState.queue&&resumeState.queue.length>0&&resumeState.queueIdx<resumeState.queue.length){sessionMode=resumeState.mode||'all';queue=resumeState.queue;queueIdx=resumeState.queueIdx;sessionAnswers=resumeState.sessionAnswers||{};['all','wrong','unanswered'].forEach(m=>document.getElementById('mode-'+m).classList.toggle('active',m===sessionMode));showCard(queue[queueIdx]);}else{buildQueue('all');showCard(queue[0]);}}
+// まずlocalStorageから即座に表示
 startSession();
 showToast('☁ 同期中...','var(--text2)');
 onValue(dbRef,(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};startSession();}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
