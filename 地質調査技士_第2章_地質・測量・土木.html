@@ -237,9 +237,9 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 <div id="sync-toast" style="display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 18px;font-size:12px;color:var(--text2);z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:opacity .3s;pointer-events:none;"></div>
 <div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src="" alt=""></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
 
 const ALL_CARDS = [{"year": "r3", "yearLabel": "R3", "q": 17, "qp": 33, "ap": 34}, {"year": "r3", "yearLabel": "R3", "q": 18, "qp": 35, "ap": 36}, {"year": "r3", "yearLabel": "R3", "q": 19, "qp": 37, "ap": 38}, {"year": "r3", "yearLabel": "R3", "q": 20, "qp": 39, "ap": 40}, {"year": "r3", "yearLabel": "R3", "q": 21, "qp": 41, "ap": 42}, {"year": "r3", "yearLabel": "R3", "q": 22, "qp": 43, "ap": 44}, {"year": "r3", "yearLabel": "R3", "q": 23, "qp": 45, "ap": 46}, {"year": "r3", "yearLabel": "R3", "q": 24, "qp": 47, "ap": 48}, {"year": "r3", "yearLabel": "R3", "q": 25, "qp": 49, "ap": 50}, {"year": "r3", "yearLabel": "R3", "q": 26, "qp": 51, "ap": 52}, {"year": "r3", "yearLabel": "R3", "q": 27, "qp": 53, "ap": 54}, {"year": "r3", "yearLabel": "R3", "q": 28, "qp": 55, "ap": 56}, {"year": "r4", "yearLabel": "R4", "q": 17, "qp": 33, "ap": 34}, {"year": "r4", "yearLabel": "R4", "q": 18, "qp": 35, "ap": 36}, {"year": "r4", "yearLabel": "R4", "q": 19, "qp": 37, "ap": 38}, {"year": "r4", "yearLabel": "R4", "q": 20, "qp": 39, "ap": 40}, {"year": "r4", "yearLabel": "R4", "q": 21, "qp": 41, "ap": 42}, {"year": "r4", "yearLabel": "R4", "q": 22, "qp": 43, "ap": 44}, {"year": "r4", "yearLabel": "R4", "q": 23, "qp": 45, "ap": 46}, {"year": "r4", "yearLabel": "R4", "q": 24, "qp": 47, "ap": 48}, {"year": "r4", "yearLabel": "R4", "q": 25, "qp": 49, "ap": 50}, {"year": "r4", "yearLabel": "R4", "q": 26, "qp": 51, "ap": 52}, {"year": "r4", "yearLabel": "R4", "q": 27, "qp": 53, "ap": 54}, {"year": "r4", "yearLabel": "R4", "q": 28, "qp": 55, "ap": 56}, {"year": "r5", "yearLabel": "R5", "q": 17, "qp": 33, "ap": 34}, {"year": "r5", "yearLabel": "R5", "q": 18, "qp": 35, "ap": 36}, {"year": "r5", "yearLabel": "R5", "q": 19, "qp": 37, "ap": 38}, {"year": "r5", "yearLabel": "R5", "q": 20, "qp": 39, "ap": 40}, {"year": "r5", "yearLabel": "R5", "q": 21, "qp": 41, "ap": 42}, {"year": "r5", "yearLabel": "R5", "q": 22, "qp": 43, "ap": 44}, {"year": "r5", "yearLabel": "R5", "q": 23, "qp": 45, "ap": 46}, {"year": "r5", "yearLabel": "R5", "q": 24, "qp": 47, "ap": 48}, {"year": "r5", "yearLabel": "R5", "q": 25, "qp": 49, "ap": 50}, {"year": "r5", "yearLabel": "R5", "q": 26, "qp": 51, "ap": 52}, {"year": "r5", "yearLabel": "R5", "q": 27, "qp": 53, "ap": 54}, {"year": "r5", "yearLabel": "R5", "q": 28, "qp": 55, "ap": 56}, {"year": "r6", "yearLabel": "R6", "q": 17, "qp": 33, "ap": 34}, {"year": "r6", "yearLabel": "R6", "q": 18, "qp": 35, "ap": 36}, {"year": "r6", "yearLabel": "R6", "q": 19, "qp": 37, "ap": 38}, {"year": "r6", "yearLabel": "R6", "q": 20, "qp": 39, "ap": 40}, {"year": "r6", "yearLabel": "R6", "q": 21, "qp": 41, "ap": 42}, {"year": "r6", "yearLabel": "R6", "q": 22, "qp": 43, "ap": 44}, {"year": "r6", "yearLabel": "R6", "q": 23, "qp": 45, "ap": 46}, {"year": "r6", "yearLabel": "R6", "q": 24, "qp": 47, "ap": 48}, {"year": "r6", "yearLabel": "R6", "q": 25, "qp": 49, "ap": 50}, {"year": "r6", "yearLabel": "R6", "q": 26, "qp": 51, "ap": 52}, {"year": "r6", "yearLabel": "R6", "q": 27, "qp": 53, "ap": 54}, {"year": "r6", "yearLabel": "R6", "q": 28, "qp": 55, "ap": 56}, {"year": "r7", "yearLabel": "R7", "q": 17, "qp": 33, "ap": 34}, {"year": "r7", "yearLabel": "R7", "q": 18, "qp": 35, "ap": 36}, {"year": "r7", "yearLabel": "R7", "q": 19, "qp": 37, "ap": 38}, {"year": "r7", "yearLabel": "R7", "q": 20, "qp": 39, "ap": 40}, {"year": "r7", "yearLabel": "R7", "q": 21, "qp": 41, "ap": 42}, {"year": "r7", "yearLabel": "R7", "q": 22, "qp": 43, "ap": 44}, {"year": "r7", "yearLabel": "R7", "q": 23, "qp": 45, "ap": 46}, {"year": "r7", "yearLabel": "R7", "q": 24, "qp": 47, "ap": 48}, {"year": "r7", "yearLabel": "R7", "q": 25, "qp": 49, "ap": 50}, {"year": "r7", "yearLabel": "R7", "q": 26, "qp": 51, "ap": 52}, {"year": "r7", "yearLabel": "R7", "q": 27, "qp": 53, "ap": 54}, {"year": "r7", "yearLabel": "R7", "q": 28, "qp": 55, "ap": 56}];
 const TOTAL = ALL_CARDS.length;
@@ -262,9 +262,9 @@ const firebaseConfig={
   messagingSenderId: "31629157067",
   appId: "1:31629157067:web:21ab0c0f2bf81f4d64f14e"
 };
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-const dbRef=ref(db,'user/ch2');
+const app=firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const dbRef=db.ref('user/ch2');
 const LS_KEY='gfFlash_ch2';
 
 let toastTimer=null;
@@ -275,7 +275,7 @@ function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify({results,gradeH
 function lsLoad(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){results=d.results||{};gradeHistory=d.gradeHistory||[];resumeState=d.resumeState||null;}}catch(e){}}
 
 let saveTimer=null;
-function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await set(dbRef,{results,gradeHistory,resumeState});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
+function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await dbRef.set({results,gradeHistory,resumeState});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
 
 let queue=[],queueIdx=0,sessionMode='all',revealed=false,currentIdx=null,sessionAnswers={},fbLoaded=false;
 
@@ -357,9 +357,8 @@ function startSession(){if(resumeState&&resumeState.queue&&resumeState.queue.len
 // まずlocalStorageから即座に表示
 startSession();
 showToast('☁ 同期中...','var(--text2)');
-onValue(dbRef,(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};startSession();}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
-
-window.switchTab=switchTab;window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;
+dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};startSession();}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
+window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;
 </script>
 </body>
 </html>
