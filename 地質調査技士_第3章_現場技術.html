@@ -253,7 +253,7 @@ function prefetchAround(idx) {
   });
 }
 
-const firebaseConfig={{
+const firebaseConfig={
   apiKey: "AIzaSyCsg7DIijPKjBYqnqgORvlaJRFZQzigd4E",
   authDomain: "chishitsu-flashcard.firebaseapp.com",
   databaseURL: "https://chishitsu-flashcard-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -261,7 +261,7 @@ const firebaseConfig={{
   storageBucket: "chishitsu-flashcard.firebasestorage.app",
   messagingSenderId: "31629157067",
   appId: "1:31629157067:web:21ab0c0f2bf81f4d64f14e"
-}};
+};
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 const dbRef=ref(db,'user/ch3');
