@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>地質調査技士 虫食い問題</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: #f0f4f8;
+    color: #1a2a3a;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+  header {
+    background: #1a3a5c;
+    color: white;
+    padding: 16px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.05em; }
+  header p { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+  .controls {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid #dde3ea;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 57px;
+    z-index: 99;
+  }
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-change { background: #1a3a5c; color: white; flex: 1; min-width: 90px; }
+  .btn-reveal { background: #e8f0fe; color: #1a56db; flex: 1; min-width: 90px; }
+  .btn-reset { background: #fdecea; color: #c0392b; flex: 1; min-width: 90px; }
+  .hint {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7c93;
+    padding: 8px 16px;
+    background: #f9fafc;
+    border-bottom: 1px solid #dde3ea;
+  }
+  .content { padding: 16px; max-width: 700px; margin: 0 auto; }
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    font-size: 15px;
+    line-height: 2.1;
+  }
+  .blank {
+    display: inline-block;
+    background: #1a3a5c;
+    color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px 6px;
+    min-width: 2em;
+    text-align: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s, color 0.2s;
+    touch-action: manipulation;
+    font-weight: 600;
+  }
+  .blank.revealed {
+    background: #e8f4fd;
+    color: #1a56db;
+    border: 1.5px solid #90c2f0;
+  }
+  .score-bar {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7c93;
+    padding: 8px 16px 4px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .progress {
+    height: 4px;
+    background: #dde3ea;
+    border-radius: 2px;
+    margin: 6px 16px 0;
+    max-width: 668px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #1a3a5c;
+    border-radius: 2px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>地質調査技士 虫食い問題</h1>
+  <p>都市計画道路の土質調査</p>
+</header>
+<div class="controls">
+  <button class="btn btn-change" onclick="changeBlank()">🔀 Change</button>
+  <button class="btn btn-reveal" onclick="revealAll()">👁 全て表示</button>
+  <button class="btn btn-reset" onclick="resetAll()">↩ リセット</button>
+</div>
+<div class="hint">青い部分をタップすると答えが現れます</div>
+<div class="score-bar"><span id="score-text">0 / 0 確認済み</span></div>
+<div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+<div class="content" id="content"></div>
+
+<script>
+const segments = [
+  {text:"都市計画道路の",key:false,para:false},
+  {text:"拡幅未施工区間",key:true},
+  {text:"における",key:false},
+  {text:"道路盛土",key:true},
+  {text:"の土質調査。調査地は",key:false},
+  {text:"浮島ヶ原",key:true},
+  {text:"と呼ばれる",key:false},
+  {text:"低湿地帯",key:true},
+  {text:"で、",key:false},
+  {text:"富士川",key:true},
+  {text:"と",key:false},
+  {text:"狩野川",key:true},
+  {text:"の運搬土砂が",key:false},
+  {text:"砂礫州",key:true},
+  {text:"となり、その背後に形成された",key:false},
+  {text:"潟湖",key:true},
+  {text:"が",key:false},
+  {text:"湿地化",key:true},
+  {text:"したものである。",key:false},
+
+  {text:"軟弱で",key:false,para:true},
+  {text:"有機質",key:true},
+  {text:"な",key:false},
+  {text:"沖積粘土",key:true},
+  {text:"が層厚",key:false},
+  {text:"10ｍ",key:true},
+  {text:"程度分布している。盛土施工による",key:false},
+  {text:"沈下対策",key:true},
+  {text:"のため、",key:false},
+  {text:"深層混合処理工法",key:true},
+  {text:"のみが計画されており、",key:false},
+  {text:"圧密沈下",key:true},
+  {text:"の検討がされていなかったため、",key:false},
+  {text:"圧密沈下量",key:true},
+  {text:"とその",key:false},
+  {text:"対策の検討",key:true},
+  {text:"が課題だった。",key:false},
+
+  {text:"圧密沈下の原因となる",key:false,para:true},
+  {text:"軟弱で有機質な沖積粘土",key:true},
+  {text:"の",key:false},
+  {text:"層厚と分布状況",key:true},
+  {text:"を把握するため、調査ボーリングを設計本数の",key:false},
+  {text:"2本",key:true},
+  {text:"から",key:false},
+  {text:"3本",key:true},
+  {text:"に増やして行った。また、",key:false},
+  {text:"圧密沈下解析",key:true},
+  {text:"において必要な",key:false},
+  {text:"圧密諸量",key:true},
+  {text:"を把握するために、",key:false},
+  {text:"乱れの少ない試料",key:true},
+  {text:"を採取して、",key:false},
+  {text:"土の段階載荷における圧密試験",key:true},
+  {text:"を行うこととした。乱れの少ない試料を採取するため、試料採取時には",key:false},
+  {text:"固定ピストン式シンウォールサンプラー",key:true},
+  {text:"を用いることとした。",key:false},
+
+  {text:"現況道路に対する盛土高は",key:false,para:true},
+  {text:"0.3ｍ",key:true},
+  {text:"の",key:false},
+  {text:"低盛土",key:true},
+  {text:"であり、",key:false},
+  {text:"盛土荷重分の地中応力",key:true},
+  {text:"と",key:false},
+  {text:"圧密降伏応力が一致",key:true},
+  {text:"する点、",key:false},
+  {text:"残留沈下量が0.4cm程度と少ない",key:true},
+  {text:"点が判明したため",key:false},
+  {text:"圧密沈下対策は不要",key:true},
+  {text:"だと提案できた。",key:false},
+  {text:"地下水位が高く",key:true},
+  {text:"、交通荷重による",key:false},
+  {text:"ポンピング",key:true},
+  {text:"で",key:false},
+  {text:"細粒分ののめり込みによる脆弱化",key:true},
+  {text:"が予想されたため、盛土底部に",key:false},
+  {text:"ジオテキスタイル敷設",key:true},
+  {text:"が提案できた。調査地では",key:false},
+  {text:"液状化発生の可能性が高い",key:true},
+  {text:"ため、",key:false},
+  {text:"液状化対策工法の検討",key:true},
+  {text:"が必要である。",key:false},
+];
+
+const keyIndices = segments.map((s,i)=>s.key?i:-1).filter(i=>i>=0);
+let activeSet = [];
+let revealed = new Set();
+
+function pickSet() {
+  const count = Math.ceil(keyIndices.length * 0.75);
+  const shuffled = [...keyIndices].sort(()=>Math.random()-0.5);
+  activeSet = shuffled.slice(0, count);
+  revealed = new Set();
+}
+
+function render() {
+  const content = document.getElementById('content');
+  let sections = [];
+  let current = [];
+  segments.forEach((seg, i) => {
+    if (seg.para && current.length > 0) { sections.push(current); current = []; }
+    current.push({...seg, idx: i});
+  });
+  if (current.length) sections.push(current);
+
+  let html = '';
+  sections.forEach(sec => {
+    html += '<div class="section">';
+    sec.forEach(seg => {
+      if (activeSet.includes(seg.idx)) {
+        const isRev = revealed.has(seg.idx);
+        html += `<span class="blank${isRev?' revealed':''}" id="b${seg.idx}" onclick="toggle(${seg.idx})">${seg.text}</span>`;
+      } else {
+        html += `<span>${seg.text}</span>`;
+      }
+    });
+    html += '</div>';
+  });
+  content.innerHTML = html;
+  updateScore();
+}
+
+function toggle(i) {
+  revealed.has(i) ? revealed.delete(i) : revealed.add(i);
+  const el = document.getElementById('b'+i);
+  if (el) el.classList.toggle('revealed');
+  updateScore();
+}
+
+function revealAll() { activeSet.forEach(i => revealed.add(i)); render(); }
+function resetAll() { revealed = new Set(); render(); }
+function changeBlank() { pickSet(); render(); }
+
+function updateScore() {
+  const total = activeSet.length;
+  const done = revealed.size;
+  document.getElementById('score-text').textContent = `${done} / ${total} 確認済み`;
+  document.getElementById('progress-fill').style.width = (total > 0 ? done/total*100 : 0) + '%';
+}
+
+pickSet();
+render();
+</script>
+</body>
+</html>
