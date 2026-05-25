@@ -94,8 +94,6 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .modal-toggle-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .modal-toggle-btn.active{background:var(--surface);border-color:var(--accent);color:var(--text);}
 .modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;}
-.modal-start-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border-radius:0 0 14px 14px;letter-spacing:.05em;transition:opacity .15s;}
-.modal-start-btn:active{opacity:.8;}
 .modal-img{width:100%;display:block;border-radius:0 0 14px 14px;}
 .modal-answer-header{padding:10px 20px;background:rgba(34,197,94,.06);border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;color:var(--correct);font-weight:700;}
 #view-stats{padding:0;}
@@ -126,6 +124,7 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .lightbox.open{display:flex;}
 .lightbox img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:6px;}
 @media(max-width:600px){.judge-row{grid-template-columns:1fr 1fr;}.btn-skip{grid-column:span 2;}.card-grid{grid-template-columns:1fr 1fr;}}
+.modal-start-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.05em;}
 </style>
 </head>
 <body>
@@ -233,7 +232,6 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
     <div id="modal-a-section" style="display:none">
       <div class="modal-answer-header">✓ 解答・解説</div>
       <img id="modal-a-img" class="modal-img" src="" alt="解説" onclick="openLightbox(this.src)" style="cursor:zoom-in">
-    <button class="modal-start-btn" onclick="startFromList()">▶ ここからスタート</button>
     </div>
   </div>
 </div>
@@ -336,25 +334,12 @@ function renderList(f){let idxs=ALL_CARDS.map((_,i)=>i);if(f==='correct')idxs=id
     return `<div class="list-card" onclick="openModal(${i})"><img class="list-card-img" src="${getPage(c.year,c.qp)}" alt="${c.yearLabel}-問${c.q}" loading="lazy"><div class="list-card-body"><span class="list-card-num">${c.yearLabel}-Q${String(c.q).padStart(3,'0')}</span><span class="list-card-status status-${st}">${lb}</span></div></div>`;
   }).join('');
 }
-let modalCardIdx=0;
-function openModal(i){modalCardIdx=i;const c=ALL_CARDS[i];document.getElementById('modal-title').textContent=`${c.yearLabel} 問${c.q}`;document.getElementById('modal-q-img').src=getPage(c.year,c.qp);document.getElementById('modal-a-img').src=getPage(c.year,c.ap);modalShowQ();document.getElementById('modal').classList.add('open');}
+var modalCardIdx=0;function openModal(i){modalCardIdx=i;const c=ALL_CARDS[i];document.getElementById('modal-title').textContent=`${c.yearLabel} 問${c.q}`;document.getElementById('modal-q-img').src=getPage(c.year,c.qp);document.getElementById('modal-a-img').src=getPage(c.year,c.ap);modalShowQ();document.getElementById('modal').classList.add('open');}
 function modalShowQ(){document.getElementById('modal-q-section').style.display='block';document.getElementById('modal-a-section').style.display='none';document.getElementById('modal-btn-q').classList.add('active');document.getElementById('modal-btn-a').classList.remove('active');}
 function modalShowA(){document.getElementById('modal-q-section').style.display='none';document.getElementById('modal-a-section').style.display='block';document.getElementById('modal-btn-q').classList.remove('active');document.getElementById('modal-btn-a').classList.add('active');}
 function closeModal(){document.getElementById('modal').classList.remove('open');}
-function startFromList(){
-  closeModal();
-  sessionMode='all';
-  sessionAnswers={};
-  ['all','wrong','unanswered'].forEach(m=>document.getElementById('mode-'+m).classList.toggle('active',m==='all'));
-  buildQueue('all');
-  const pos=queue.indexOf(modalCardIdx);
-  if(pos>=0){queueIdx=pos;}else{queue.unshift(modalCardIdx);queueIdx=0;}
-  resumeState={mode:sessionMode,queue,queueIdx,sessionAnswers};
-  scheduleSave();
-  switchTab('study');
-  showCard(queue[queueIdx]);
-}
 function closeModalBg(e){if(e.target===document.getElementById('modal'))closeModal();}
+function startFromList(){closeModal();buildQueue('all');var pos=queue.indexOf(modalCardIdx);if(pos>=0){queueIdx=pos;}else{queue.unshift(modalCardIdx);queueIdx=0;}switchTab('study');showCard(queue[queueIdx]);}
 function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
