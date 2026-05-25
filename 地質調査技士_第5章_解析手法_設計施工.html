@@ -334,27 +334,7 @@ function renderList(f){let idxs=ALL_CARDS.map((_,i)=>i);if(f==='correct')idxs=id
     return `<div class="list-card" onclick="openModal(${i})"><img class="list-card-img" src="${getPage(c.year,c.qp)}" alt="${c.yearLabel}-問${c.q}" loading="lazy"><div class="list-card-body"><span class="list-card-num">${c.yearLabel}-Q${String(c.q).padStart(3,'0')}</span><span class="list-card-status status-${st}">${lb}</span></div></div>`;
   }).join('');
 }
-var modalCardIdx=0;
-// モーダル表示時にボタンを動的に挿入
-function openModal(i){
-  modalCardIdx=i;
-  const c=ALL_CARDS[i];
-  document.getElementById('modal-title').textContent=c.yearLabel+' 問'+c.q;
-  document.getElementById('modal-q-img').src=getPage(c.year,c.qp);
-  document.getElementById('modal-a-img').src=getPage(c.year,c.ap);
-  modalShowQ();
-  document.getElementById('modal').classList.add('open');
-  // ボタンがなければ追加
-  if(!document.getElementById('start-from-list-btn')){
-    var btn=document.createElement('button');
-    btn.id='start-from-list-btn';
-    btn.textContent='▶ ここからスタート';
-    btn.style.cssText='display:block;width:100%;padding:11px;background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.05em;border-top:1px solid rgba(255,255,255,.2);';
-    btn.onclick=function(){startFromList();};
-    var header=document.querySelector('.modal-header');
-    header.insertAdjacentElement('afterend',btn);
-  }
-} 問${c.q}`;document.getElementById('modal-q-img').src=getPage(c.year,c.qp);document.getElementById('modal-a-img').src=getPage(c.year,c.ap);modalShowQ();document.getElementById('modal').classList.add('open');var existBtn=document.getElementById('start-from-list-btn');if(!existBtn){var btn=document.createElement('button');btn.id='start-from-list-btn';btn.textContent='▶ ここからスタート';btn.style.cssText='display:block;width:100%;padding:11px;background:#4f8ef7;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.05em;';btn.onclick=function(){startFromList();};var header=document.querySelector('.modal-header');header.insertAdjacentElement('afterend',btn);}}
+var modalCardIdx=0;function openModal(i){modalCardIdx=i;const c=ALL_CARDS[i];document.getElementById('modal-title').textContent=`${c.yearLabel} 問${c.q}`;document.getElementById('modal-q-img').src=getPage(c.year,c.qp);document.getElementById('modal-a-img').src=getPage(c.year,c.ap);modalShowQ();document.getElementById('modal').classList.add('open');var existBtn=document.getElementById('start-from-list-btn');if(!existBtn){var btn=document.createElement('button');btn.id='start-from-list-btn';btn.textContent='▶ ここからスタート';btn.style.cssText='display:block;width:100%;padding:11px;background:#4f8ef7;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.05em;';btn.onclick=function(){startFromList();};var header=document.querySelector('.modal-header');header.insertAdjacentElement('afterend',btn);}}
 function modalShowQ(){document.getElementById('modal-q-section').style.display='block';document.getElementById('modal-a-section').style.display='none';document.getElementById('modal-btn-q').classList.add('active');document.getElementById('modal-btn-a').classList.remove('active');}
 function modalShowA(){document.getElementById('modal-q-section').style.display='none';document.getElementById('modal-a-section').style.display='block';document.getElementById('modal-btn-q').classList.remove('active');document.getElementById('modal-btn-a').classList.add('active');}
 function closeModal(){document.getElementById('modal').classList.remove('open');}
@@ -383,7 +363,7 @@ function doStartSession(){if(sessionStarted)return;sessionStarted=true;startSess
 setTimeout(doStartSession,3000);
 showToast('☁ 同期中...','var(--text2)');
 dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}doStartSession();}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
-window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;
+window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;window.startFromList=startFromList;
 </script>
 </body>
 </html>
