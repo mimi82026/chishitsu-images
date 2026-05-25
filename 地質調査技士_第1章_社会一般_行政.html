@@ -124,7 +124,7 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .lightbox.open{display:flex;}
 .lightbox img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:6px;}
 @media(max-width:600px){.judge-row{grid-template-columns:1fr 1fr;}.btn-skip{grid-column:span 2;}.card-grid{grid-template-columns:1fr 1fr;}}
-.modal-start-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.05em;}
+.modal-start-btn{display:block;width:100%;padding:10px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.05em;border-radius:0;}
 </style>
 </head>
 <body>
@@ -233,7 +233,6 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
       <div class="modal-answer-header">✓ 解答・解説</div>
       <img id="modal-a-img" class="modal-img" src="" alt="解説" onclick="openLightbox(this.src)" style="cursor:zoom-in">
     </div>
-  <button class="modal-start-btn" onclick="startFromList()">▶ ここからスタート</button>
   </div>
 </div>
 <div id="sync-toast" style="display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 18px;font-size:12px;color:var(--text2);z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:opacity .3s;pointer-events:none;"></div>
