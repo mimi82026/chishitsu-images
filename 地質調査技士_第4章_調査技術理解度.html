@@ -125,6 +125,12 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .lightbox img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:6px;}
 @media(max-width:600px){.judge-row{grid-template-columns:1fr 1fr;}.btn-skip{grid-column:span 2;}.card-grid{grid-template-columns:1fr 1fr;}}
 .modal-start-btn{display:block;width:100%;padding:10px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.05em;border-radius:0;}
+.list-card{position:relative;}
+.list-card.bookmarked::after{content:"🔖";position:absolute;top:4px;right:4px;font-size:14px;}
+.filter-btn.f-bookmark{border-color:#f59e0b;color:#f59e0b;}
+.filter-btn.f-bookmark.active{background:#f59e0b;border-color:#f59e0b;color:#fff;}
+.mode-btn.mode-bookmark{border-color:#f59e0b;color:#f59e0b;}
+.mode-btn.mode-bookmark.active{background:#f59e0b;border-color:#f59e0b;color:#fff;}
 </style>
 </head>
 <body>
@@ -147,6 +153,7 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
       <button class="mode-btn active" id="mode-all" onclick="setMode('all')">全問</button>
       <button class="mode-btn" id="mode-wrong" onclick="setMode('wrong')">不正解のみ</button>
       <button class="mode-btn" id="mode-unanswered" onclick="setMode('unanswered')">未回答のみ</button>
+      <button class="mode-btn mode-bookmark" id="mode-bookmark" onclick="setMode('bookmark')">🔖 付箋のみ</button>
     </div>
     <div class="progress-text"><strong id="prog-cur">1</strong> / <strong id="prog-total">60</strong></div>
   </div>
@@ -200,6 +207,7 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
         <button class="filter-btn" id="f-correct" onclick="filterList('correct')">正解</button>
         <button class="filter-btn" id="f-wrong" onclick="filterList('wrong')">不正解</button>
         <button class="filter-btn" id="f-unanswered" onclick="filterList('unanswered')">未回答</button>
+        <button class="filter-btn f-bookmark" id="f-bookmark" onclick="filterList('bookmark')">🔖 付箋</button>
       </div>
     </div>
     <div class="card-grid" id="card-grid"></div>
@@ -283,7 +291,7 @@ let queue=[],queueIdx=0,sessionMode='all',revealed=false,currentIdx=null,session
 
 function updateHeaderStats(){const v=Object.values(results);const c=v.filter(x=>x==='correct').length;const w=v.filter(x=>x==='wrong').length;document.getElementById('h-correct').textContent=c;document.getElementById('h-wrong').textContent=w;document.getElementById('h-unanswered').textContent=TOTAL-c-w;}
 
-function buildQueue(mode){const all=ALL_CARDS.map((_,i)=>i);if(mode==='wrong'){queue=all.filter(i=>results[i]==='wrong');if(!queue.length)queue=all.filter(i=>!results[i]);if(!queue.length)queue=all;}else if(mode==='unanswered'){queue=all.filter(i=>!results[i]);if(!queue.length)queue=all;}else{queue=all;}queueIdx=0;}
+function buildQueue(mode){const all=ALL_CARDS.map((_,i)=>i);if(mode==='wrong'){queue=all.filter(i=>results[i]==='wrong');if(!queue.length)queue=all.filter(i=>!results[i]);if(!queue.length)queue=all;}else if(mode==='unanswered'){queue=all.filter(i=>!results[i]);if(!queue.length)queue=all;}else if(mode==='bookmark'){queue=all.filter(i=>bookmarks.has(i));}else{queue=all;}queueIdx=0;}
 
 function applyQ(){document.getElementById('panel-label').textContent='QUESTION';document.getElementById('card-qnum').classList.remove('answer-mode');document.getElementById('card-panel').classList.remove('answer-mode');document.getElementById('answer-badge').classList.remove('visible');document.getElementById('btn-show-q').classList.add('active');document.getElementById('btn-show-a').classList.remove('active');}
 function applyA(){document.getElementById('panel-label').textContent='ANSWER & EXPLANATION';document.getElementById('card-qnum').classList.add('answer-mode');document.getElementById('card-panel').classList.add('answer-mode');document.getElementById('answer-badge').classList.add('visible');document.getElementById('btn-show-q').classList.remove('active');document.getElementById('btn-show-a').classList.add('active');}
@@ -327,12 +335,12 @@ function commitGrade(){const vals=Object.values(sessionAnswers);const sc=vals.fi
   document.getElementById('grade-btn').textContent='✅ 成績を記録しました';document.getElementById('grade-btn').disabled=true;document.getElementById('grade-btn').style.opacity='0.6';scheduleSave();
 }
 
-function setMode(mode){sessionMode=mode;sessionAnswers={};['all','wrong','unanswered'].forEach(m=>document.getElementById('mode-'+m).classList.toggle('active',m===mode));buildQueue(mode);if(!queue.length){showComplete();return;}switchTab('study');showCard(queue[0]);}
+function setMode(mode){sessionMode=mode;sessionAnswers={};['all','wrong','unanswered','bookmark'].forEach(m=>{const el=document.getElementById('mode-'+m);if(el)el.classList.toggle('active',m===mode);});buildQueue(mode);if(mode==='bookmark'&&!queue.length){alert('付箋がついている問題がありません');return;}if(!queue.length){showComplete();return;}switchTab('study');showCard(queue[0]);}
 function switchTab(name){document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['study','list','stats'][i]===name));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');if(name==='list')renderList('all');if(name==='stats')renderStats();}
-function filterList(f){['all','correct','wrong','unanswered'].forEach(x=>document.getElementById('f-'+x).classList.toggle('active',x===f));renderList(f);}
-function renderList(f){let idxs=ALL_CARDS.map((_,i)=>i);if(f==='correct')idxs=idxs.filter(i=>results[i]==='correct');else if(f==='wrong')idxs=idxs.filter(i=>results[i]==='wrong');else if(f==='unanswered')idxs=idxs.filter(i=>!results[i]);
+function filterList(f){['all','correct','wrong','unanswered','bookmark'].forEach(x=>{const el=document.getElementById('f-'+x);if(el)el.classList.toggle('active',x===f);});renderList(f);}
+function renderList(f){let idxs=ALL_CARDS.map((_,i)=>i);if(f==='correct')idxs=idxs.filter(i=>results[i]==='correct');else if(f==='wrong')idxs=idxs.filter(i=>results[i]==='wrong');else if(f==='unanswered')idxs=idxs.filter(i=>!results[i]);else if(f==='bookmark')idxs=idxs.filter(i=>bookmarks.has(i));
   document.getElementById('card-grid').innerHTML=idxs.map(i=>{const c=ALL_CARDS[i];const st=results[i]||'unanswered';const lb=st==='correct'?'正解':st==='wrong'?'不正解':'未回答';
-    return `<div class="list-card" onclick="openModal(${i})"><img class="list-card-img" src="${getPage(c.year,c.qp)}" alt="${c.yearLabel}-問${c.q}" loading="lazy"><div class="list-card-body"><span class="list-card-num">${c.yearLabel}-Q${String(c.q).padStart(3,'0')}</span><span class="list-card-status status-${st}">${lb}</span></div></div>`;
+    return `<div class="list-card${bookmarks.has(i)?' bookmarked':''}" onclick="openModal(${i})"><img class="list-card-img" src="${getPage(c.year,c.qp)}" alt="${c.yearLabel}-問${c.q}" loading="lazy"><div class="list-card-body"><span class="list-card-num">${c.yearLabel}-Q${String(c.q).padStart(3,'0')}</span><span class="list-card-status status-${st}">${lb}</span></div></div>`;
   }).join('');
 }
 var modalCardIdx=0;function openModal(i){modalCardIdx=i;const c=ALL_CARDS[i];document.getElementById('modal-title').textContent=`${c.yearLabel} 問${c.q}`;document.getElementById('modal-q-img').src=getPage(c.year,c.qp);document.getElementById('modal-a-img').src=getPage(c.year,c.ap);modalShowQ();document.getElementById('modal').classList.add('open');var existBtn=document.getElementById('start-from-list-btn');if(!existBtn){var btn=document.createElement('button');btn.id='start-from-list-btn';btn.textContent='▶ ここからスタート';btn.style.cssText='display:block;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.05em;position:sticky;bottom:0;z-index:20;';btn.onclick=function(){startFromList();};document.querySelector('.modal').appendChild(btn);}}
@@ -354,10 +362,10 @@ function renderStats(){const v=Object.values(results);const c=v.filter(x=>x==='c
   }).join('');
 }
 
-function resetAll(){if(!confirm('全記録をリセットしますか？'))return;results={};gradeHistory=[];resumeState=null;updateHeaderStats();sessionMode='all';sessionAnswers={};['all','wrong','unanswered'].forEach(m=>document.getElementById('mode-'+m).classList.toggle('active',m==='all'));scheduleSave();buildQueue('all');switchTab('study');showCard(queue[0]);}
+function resetAll(){if(!confirm('全記録をリセットしますか？'))return;results={};gradeHistory=[];resumeState=null;updateHeaderStats();sessionMode='all';sessionAnswers={};['all','wrong','unanswered','bookmark'].forEach(m=>{const el=document.getElementById('mode-'+m);if(el)el.classList.toggle('active',m==='all');});scheduleSave();buildQueue('all');switchTab('study');showCard(queue[0]);}
 
 lsLoad();updateHeaderStats();
-function startSession(){if(resumeState&&resumeState.queue&&resumeState.queue.length>0&&resumeState.queueIdx<resumeState.queue.length){sessionMode=resumeState.mode||'all';queue=resumeState.queue;queueIdx=resumeState.queueIdx;sessionAnswers=resumeState.sessionAnswers||{};['all','wrong','unanswered'].forEach(m=>document.getElementById('mode-'+m).classList.toggle('active',m===sessionMode));showCard(queue[queueIdx]);}else{buildQueue('all');showCard(queue[0]);}}
+function startSession(){if(resumeState&&resumeState.queue&&resumeState.queue.length>0&&resumeState.queueIdx<resumeState.queue.length){sessionMode=resumeState.mode||'all';queue=resumeState.queue;queueIdx=resumeState.queueIdx;sessionAnswers=resumeState.sessionAnswers||{};['all','wrong','unanswered','bookmark'].forEach(m=>{const el=document.getElementById('mode-'+m);if(el)el.classList.toggle('active',m===sessionMode);});showCard(queue[queueIdx]);}else{buildQueue('all');showCard(queue[0]);}}
 // まずlocalStorageから即座に表示
 // Firebaseの読み込みを最大3秒待ってからstartSession
 let sessionStarted=false;
