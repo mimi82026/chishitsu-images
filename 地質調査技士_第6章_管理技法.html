@@ -48,14 +48,14 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .card-hint:hover{border-color:var(--accent);color:var(--accent);}
 .answer-actions{width:100%;max-width:860px;display:none;flex-direction:column;gap:10px;}
 .answer-actions.visible{display:flex;}
-.judge-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.judge-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}.nav-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
 .answer-btn{padding:14px 10px;border-radius:12px;border:1px solid;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
 .btn-correct{background:rgba(34,197,94,.1);border-color:var(--correct);color:var(--correct);}
 .btn-correct:hover{background:rgba(34,197,94,.22);}
 .btn-wrong{background:rgba(239,68,68,.1);border-color:var(--wrong);color:var(--wrong);}
 .btn-wrong:hover{background:rgba(239,68,68,.22);}
-.btn-skip{background:var(--surface);border-color:var(--border);color:var(--text2);font-size:13px;}
-.btn-skip:hover{background:var(--surface2);color:var(--text);}
+.btn-nav{background:var(--surface);border-color:var(--border);color:var(--text2);font-size:13px;}
+.btn-nav:hover{background:var(--surface2);color:var(--text);}
 .complete-card{width:100%;max-width:700px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;display:none;}
 .complete-card.visible{display:block;}
 .complete-icon{font-size:48px;margin-bottom:14px;}
@@ -123,7 +123,7 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:300;align-items:center;justify-content:center;cursor:zoom-out;}
 .lightbox.open{display:flex;}
 .lightbox img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:6px;}
-@media(max-width:600px){.judge-row{grid-template-columns:1fr 1fr;}.btn-skip{grid-column:span 2;}.card-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.judge-row{grid-template-columns:1fr 1fr;}.nav-row{grid-template-columns:1fr 1fr;}.card-grid{grid-template-columns:1fr 1fr;}}
 .modal-start-btn{display:block;width:100%;padding:10px;background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.05em;border-radius:0;}
 .list-card{position:relative;}
 .list-card.bookmarked::after{content:"🔖";position:absolute;top:4px;right:4px;font-size:14px;}
@@ -180,7 +180,10 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
     <div class="judge-row">
       <button class="answer-btn btn-correct" onclick="markAnswer(true)">✓ 正解</button>
       <button class="answer-btn btn-wrong" onclick="markAnswer(false)">✗ 不正解</button>
-      <button class="answer-btn btn-skip" onclick="skipCard()">→ スキップ</button>
+    </div>
+    <div class="nav-row">
+      <button class="answer-btn btn-nav" onclick="prevCard()">← 前の問題へ</button>
+      <button class="answer-btn btn-nav" onclick="nextCard()">次の問題へ →</button>
     </div>
   </div>
   <div class="complete-card" id="complete-card">
@@ -190,7 +193,6 @@ header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;alig
     <div class="complete-stats">
       <div class="cstat"><div class="cstat-val" id="cs-correct" style="color:var(--correct)">0</div><div class="cstat-label">正解</div></div>
       <div class="cstat"><div class="cstat-val" id="cs-wrong" style="color:var(--wrong)">0</div><div class="cstat-label">不正解</div></div>
-      <div class="cstat"><div class="cstat-val" id="cs-skip" style="color:var(--text2)">0</div><div class="cstat-label">スキップ</div></div>
       <div class="cstat"><div class="cstat-val" id="cs-rate" style="color:var(--accent)">—</div><div class="cstat-label">正答率</div></div>
     </div>
     <button class="grade-btn" id="grade-btn" onclick="commitGrade()">📋 成績を付ける</button>
@@ -281,11 +283,11 @@ let toastTimer=null;
 function showToast(msg,color='var(--text2)'){const el=document.getElementById('sync-toast');el.textContent=msg;el.style.color=color;el.style.display='block';el.style.opacity='1';clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.style.opacity='0';setTimeout(()=>{el.style.display='none';},300);},2500);}
 
 let results={},gradeHistory=[],resumeState=null,bookmarks=new Set();
-function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify({results,gradeHistory,resumeState,bookmarks:[...bookmarks]}));}catch(e){}}
+function lsSave(){try{const ts=Date.now();localStorage.setItem(LS_KEY,JSON.stringify({results,gradeHistory,resumeState,bookmarks:[...bookmarks]}));localStorage.setItem(LS_KEY+'_ts',ts);}catch(e){}}
 function lsLoad(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){results=d.results||{};gradeHistory=d.gradeHistory||[];resumeState=d.resumeState||null;bookmarks=new Set(d.bookmarks||[]);}}catch(e){}}
 
 let saveTimer=null;
-function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await dbRef.set({results,gradeHistory,resumeState,bookmarks:[...bookmarks]});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
+function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await dbRef.set({results,gradeHistory,resumeState,bookmarks:[...bookmarks],updatedAt:Date.now()});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
 
 let queue=[],queueIdx=0,sessionMode='all',revealed=false,currentIdx=null,sessionAnswers={},fbLoaded=false;
 
@@ -318,12 +320,13 @@ function showQuestionView(){if(!revealed)return;const c=ALL_CARDS[currentIdx];do
 function showAnswerView(){if(!revealed)return;const c=ALL_CARDS[currentIdx];document.getElementById('card-img').src=getPage(c.year,c.ap);applyA();}
 
 function markAnswer(correct){if(currentIdx===null)return;const val=correct?'correct':'wrong';results[currentIdx]=val;sessionAnswers[currentIdx]=val;updateHeaderStats();advanceQueue();}
-function skipCard(){if(currentIdx===null)return;sessionAnswers[currentIdx]='skip';advanceQueue();}
+function prevCard(){if(queueIdx<=0)return;queueIdx--;showCard(queue[queueIdx]);}
+function nextCard(){if(currentIdx===null)return;if(queueIdx>=queue.length-1){showComplete();return;}queueIdx++;showCard(queue[queueIdx]);}
 function advanceQueue(){queueIdx++;if(queueIdx>=queue.length){showComplete();return;}showCard(queue[queueIdx]);}
 
 function showComplete(){resumeState=null;scheduleSave();document.getElementById('card-outer').style.display='none';document.getElementById('answer-actions').classList.remove('visible');document.getElementById('complete-card').classList.add('visible');
   const vals=Object.values(sessionAnswers);const sc=vals.filter(x=>x==='correct').length;const sw=vals.filter(x=>x==='wrong').length;const ss=vals.filter(x=>x==='skip').length;const ans=sc+sw;
-  document.getElementById('cs-correct').textContent=sc;document.getElementById('cs-wrong').textContent=sw;document.getElementById('cs-skip').textContent=ss;document.getElementById('cs-rate').textContent=ans>0?Math.round(sc/ans*100)+'%':'—';
+  document.getElementById('cs-correct').textContent=sc;document.getElementById('cs-wrong').textContent=sw;document.getElementById('cs-rate').textContent=ans>0?Math.round(sc/ans*100)+'%':'—';
   const ml=sessionMode==='wrong'?'不正解モード':sessionMode==='unanswered'?'未回答モード':'全問モード';
   document.getElementById('complete-sub').textContent=`${ml}　解答:${ans}問/スキップ:${ss}問`;
   document.getElementById('grade-btn').textContent=`📋 成績を付ける（${ml}）`;document.getElementById('grade-btn').disabled=false;document.getElementById('grade-btn').style.opacity='1';
@@ -357,7 +360,7 @@ function renderStats(){const v=Object.values(results);const c=v.filter(x=>x==='c
   document.getElementById('st-answered').textContent=a;document.getElementById('st-correct').textContent=c;document.getElementById('st-wrong').textContent=w;document.getElementById('st-rate').textContent=a>0?Math.round(c/a*100)+'%':'—';
   const listEl=document.getElementById('grade-history-list');document.getElementById('grade-count-badge').textContent=gradeHistory.length?`（${gradeHistory.length}件）`:'';
   if(!gradeHistory.length){listEl.innerHTML='<div class="empty-msg">まだ成績の記録がありません。</div>';return;}
-  listEl.innerHTML=gradeHistory.map((rec,idx)=>{const tagClass=rec.mode==='wrong'?'tag-wrong':'tag-all';const rateStr=rec.sessionAnswered>0?Math.round(rec.sessionCorrect/rec.sessionAnswered*100)+'%':'—';const totalPct=rec.sessionAnswered>0?`<span class="score-pct">(${rateStr})</span>`:'';const skipInfo=rec.sessionSkip>0?`<span style="font-size:10px;color:var(--text3);margin-left:4px">スキップ${rec.sessionSkip}</span>`:'';
+  listEl.innerHTML=gradeHistory.map((rec,idx)=>{const tagClass=rec.mode==='wrong'?'tag-wrong':'tag-all';const rateStr=rec.sessionAnswered>0?Math.round(rec.sessionCorrect/rec.sessionAnswered*100)+'%':'—';const totalPct=rec.sessionAnswered>0?`<span class="score-pct">(${rateStr})</span>`:'';const skipInfo='';
     return `<div class="grade-record"><div class="grade-record-header"><div class="grade-record-title">第${gradeHistory.length-idx}回 <span class="grade-mode-tag ${tagClass}">${rec.modeLabel}</span></div><div class="grade-record-meta">${rec.date}</div></div><table class="grade-cat-table"><tr class="total-row"><td>合計</td><td class="score-cell">${rec.sessionCorrect}/${rec.sessionAnswered}${totalPct}${skipInfo}</td></tr></table></div>`;
   }).join('');
 }
@@ -372,8 +375,8 @@ let sessionStarted=false;
 function doStartSession(){if(sessionStarted)return;sessionStarted=true;startSession();}
 setTimeout(doStartSession,3000);
 showToast('☁ 同期中...','var(--text2)');
-dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;bookmarks=new Set(data.bookmarks||[]);lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}doStartSession();}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
-window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;window.toggleBookmark=toggleBookmark;window.startFromList=startFromList;
+dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;bookmarks=new Set(data.bookmarks||[]);lsSave();localStorage.setItem(LS_KEY+'_ts',fbTime);updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}doStartSession();}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
+window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;window.toggleBookmark=toggleBookmark;window.prevCard=prevCard;window.nextCard=nextCard;window.startFromList=startFromList;
 </script>
 </body>
 </html>
