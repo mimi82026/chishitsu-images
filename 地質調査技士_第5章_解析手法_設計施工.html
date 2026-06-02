@@ -272,12 +272,12 @@ const LS_KEY='gfFlash_ch5';
 let toastTimer=null;
 function showToast(msg,color='var(--text2)'){const el=document.getElementById('sync-toast');el.textContent=msg;el.style.color=color;el.style.display='block';el.style.opacity='1';clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.style.opacity='0';setTimeout(()=>{el.style.display='none';},300);},2500);}
 
-let results={},gradeHistory=[],resumeState=null;
-function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify({results,gradeHistory,resumeState}));}catch(e){}}
-function lsLoad(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){results=d.results||{};gradeHistory=d.gradeHistory||[];resumeState=d.resumeState||null;}}catch(e){}}
+let results={},gradeHistory=[],resumeState=null,bookmarks=new Set();
+function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify({results,gradeHistory,resumeState,bookmarks:[...bookmarks]}));}catch(e){}}
+function lsLoad(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){results=d.results||{};gradeHistory=d.gradeHistory||[];resumeState=d.resumeState||null;bookmarks=new Set(d.bookmarks||[]);}}catch(e){}}
 
 let saveTimer=null;
-function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await dbRef.set({results,gradeHistory,resumeState});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
+function scheduleSave(){lsSave();clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await dbRef.set({results,gradeHistory,resumeState,bookmarks:[...bookmarks]});showToast('☁ 同期済み','var(--correct)');;}catch(e){showToast('⚠ 同期エラー','var(--wrong)');};},800);}
 
 let queue=[],queueIdx=0,sessionMode='all',revealed=false,currentIdx=null,sessionAnswers={},fbLoaded=false;
 
@@ -289,7 +289,7 @@ function applyQ(){document.getElementById('panel-label').textContent='QUESTION';
 function applyA(){document.getElementById('panel-label').textContent='ANSWER & EXPLANATION';document.getElementById('card-qnum').classList.add('answer-mode');document.getElementById('card-panel').classList.add('answer-mode');document.getElementById('answer-badge').classList.add('visible');document.getElementById('btn-show-q').classList.remove('active');document.getElementById('btn-show-a').classList.add('active');}
 
 function showCard(idx){currentIdx=idx;revealed=false;const c=ALL_CARDS[idx];
-  document.getElementById('card-outer').style.display='block';
+  document.getElementById('card-outer').style.display='block';var bb=document.getElementById('bookmark-toggle-btn');if(bb){var on=bookmarks.has(idx);bb.textContent=on?'🔖 付箋を外す':'🔖 付箋をつける';bb.style.background=on?'#b45309':'#f59e0b';bb.style.borderColor=on?'#b45309':'#f59e0b';}
   document.getElementById('complete-card').classList.remove('visible');
   document.getElementById('answer-actions').classList.remove('visible');
   document.getElementById('view-toggle-btns').classList.remove('visible');
@@ -340,6 +340,7 @@ function modalShowQ(){document.getElementById('modal-q-section').style.display='
 function modalShowA(){document.getElementById('modal-q-section').style.display='none';document.getElementById('modal-a-section').style.display='block';document.getElementById('modal-btn-q').classList.remove('active');document.getElementById('modal-btn-a').classList.add('active');}
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 function closeModalBg(e){if(e.target===document.getElementById('modal'))closeModal();}
+function toggleBookmark(){if(currentIdx===null)return;if(bookmarks.has(currentIdx)){bookmarks.delete(currentIdx);}else{bookmarks.add(currentIdx);}var bb=document.getElementById('bookmark-toggle-btn');if(bb){var on=bookmarks.has(currentIdx);bb.textContent=on?'🔖 付箋を外す':'🔖 付箋をつける';bb.style.background=on?'#b45309':'#f59e0b';bb.style.borderColor=on?'#b45309':'#f59e0b';}scheduleSave();}
 function startFromList(){closeModal();buildQueue('all');var pos=queue.indexOf(modalCardIdx);if(pos>=0){queueIdx=pos;}else{queue.unshift(modalCardIdx);queueIdx=0;}switchTab('study');showCard(queue[queueIdx]);}
 function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
@@ -363,8 +364,8 @@ let sessionStarted=false;
 function doStartSession(){if(sessionStarted)return;sessionStarted=true;startSession();}
 setTimeout(doStartSession,3000);
 showToast('☁ 同期中...','var(--text2)');
-dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}doStartSession();}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
-window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;
+dbRef.on('value',(snapshot)=>{const data=snapshot.val();if(!data){scheduleSave();return;}if(!fbLoaded){fbLoaded=true;const fbA=Object.keys(data.results||{}).length;const lsA=Object.keys(results).length;if(fbA>lsA){results=data.results||{};gradeHistory=data.gradeHistory||[];resumeState=data.resumeState||null;bookmarks=new Set(data.bookmarks||[]);lsSave();updateHeaderStats();showToast('☁ クラウドから読み込みました','var(--accent)');sessionAnswers={};}else{showToast('☁ 同期済み','var(--correct)');if(lsA>=fbA)scheduleSave();}doStartSession();}else{const fbA=Object.keys(data.results||{}).length;if(fbA>Object.keys(results).length){results=data.results||{};gradeHistory=data.gradeHistory||[];lsSave();updateHeaderStats();showToast('☁ 別デバイスと同期','var(--accent2)');}}},(e)=>{showToast('⚠ オフラインで動作中','var(--text2)');});
+window.setMode=setMode;window.revealAnswer=revealAnswer;window.showQuestionView=showQuestionView;window.showAnswerView=showAnswerView;window.markAnswer=markAnswer;window.skipCard=skipCard;window.commitGrade=commitGrade;window.filterList=filterList;window.openModal=openModal;window.modalShowQ=modalShowQ;window.modalShowA=modalShowA;window.closeModal=closeModal;window.closeModalBg=closeModalBg;window.openLightbox=openLightbox;window.closeLightbox=closeLightbox;window.renderStats=renderStats;window.resetAll=resetAll;window.toggleBookmark=toggleBookmark;window.startFromList=startFromList;
 </script>
 </body>
 </html>
