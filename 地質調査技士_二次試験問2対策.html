@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>地質調査技士 二次試験問2対策</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #0f1117;
+  color: #e8ecf0;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+header {
+  background: #1a1f2e;
+  border-bottom: 1px solid #2a3044;
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header h1 { font-size: 14px; font-weight: 700; color: #7eb8f7; letter-spacing: 0.08em; }
+.page-indicator { font-size: 12px; color: #6b7c93; font-weight: 500; }
+.rate-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #1a1f2e;
+  border-bottom: 1px solid #2a3044;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rate-label { font-size: 12px; color: #6b7c93; margin-right: 4px; }
+.rate-btn {
+  padding: 6px 16px;
+  border: 1.5px solid #2a3044;
+  border-radius: 20px;
+  background: transparent;
+  color: #8899aa;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.rate-btn.active { background: #7eb8f7; border-color: #7eb8f7; color: #0f1117; }
+.show-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  border: 1.5px solid #22c55e;
+  border-radius: 20px;
+  background: transparent;
+  color: #22c55e;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.show-btn:hover { background: #22c55e; color: #0f1117; }
+.cards-wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px; }
+.card {
+  background: #1a1f2e;
+  border: 1px solid #2a3044;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  display: none;
+}
+.card.active { display: block; }
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7eb8f7;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2a3044;
+}
+.card-theme {
+  font-size: 12px;
+  color: #8899aa;
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  background: #0f1117;
+  border-radius: 6px;
+  border-left: 3px solid #7eb8f7;
+}
+.card-text { font-size: 15px; line-height: 2.1; color: #d0d8e4; }
+.text-line { margin-bottom: 12px; }
+.blank {
+  display: inline-block;
+  background: #7eb8f7;
+  color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 1px 4px;
+  min-width: 2em;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+  touch-action: manipulation;
+  font-weight: 500;
+  vertical-align: middle;
+}
+.blank.revealed {
+  background: rgba(126,184,247,0.15);
+  color: #7eb8f7;
+  border: 1px solid #7eb8f7;
+}
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1f2e;
+  border-top: 1px solid #2a3044;
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.nav-btn {
+  flex: 1;
+  max-width: 180px;
+  padding: 12px;
+  border: 1.5px solid #2a3044;
+  border-radius: 10px;
+  background: transparent;
+  color: #8899aa;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.nav-btn:active { transform: scale(0.97); }
+.nav-btn.primary { background: #7eb8f7; border-color: #7eb8f7; color: #0f1117; }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.complete-card { text-align: center; padding: 48px 24px; display: none; }
+.complete-card.active { display: block; }
+.complete-icon { font-size: 48px; margin-bottom: 16px; }
+.complete-title { font-size: 20px; font-weight: 700; color: #7eb8f7; margin-bottom: 8px; }
+.complete-sub { font-size: 14px; color: #6b7c93; margin-bottom: 32px; }
+.restart-btn {
+  padding: 14px 32px;
+  background: #7eb8f7;
+  color: #0f1117;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>地質調査技士 二次試験問2対策</h1>
+  <span class="page-indicator" id="page-indicator">1 / 3</span>
+</header>
+
+<div class="rate-bar">
+  <span class="rate-label">穴埋め率：</span>
+  <button class="rate-btn active" id="btn-rate-50" onclick="setRate(50)">50%</button>
+  <button class="rate-btn" id="btn-rate-all" onclick="setRate('all')">ALL</button>
+  <button class="show-btn" onclick="showAll()">全て見せる</button>
+</div>
+
+<div class="cards-wrap">
+  <div class="card active" id="card-0">
+    <div class="card-label">①-1 調査地の地形の特徴・①-2 地質層序および地質構造</div>
+    <div class="card-theme">砂防ダム新設予定地の地形・地質</div>
+    <div class="card-text" id="text-0"></div>
+  </div>
+  <div class="card" id="card-1">
+    <div class="card-label">② 調査の目的と着目点</div>
+    <div class="card-theme">調査目的・着目した地質的課題</div>
+    <div class="card-text" id="text-1"></div>
+  </div>
+  <div class="card" id="card-2">
+    <div class="card-label">③-1 調査結果と信頼性・③-2 残課題と地質リスク</div>
+    <div class="card-theme">調査結果の整理と今後の課題</div>
+    <div class="card-text" id="text-2"></div>
+  </div>
+  <div class="complete-card" id="card-complete">
+    <div class="complete-icon">✅</div>
+    <div class="complete-title">練習完了！</div>
+    <div class="complete-sub">お疲れ様でした。<br>もう一度やり直しますか？</div>
+    <button class="restart-btn" onclick="restart()">もう一度やる</button>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="btn-prev" onclick="prevCard()" disabled>← 前へ</button>
+  <button class="nav-btn primary" id="btn-next" onclick="nextCard()">次へ →</button>
+</div>
+
+<script>
+const texts = [
+  // ①
+  [
+    [
+      {t:'小渓流',k:true},{t:'の',k:false},{t:'砂防ダム新設',k:true},{t:'予定地。',k:false},
+      {t:'河床',k:true},{t:'に',k:false},{t:'瀬戸川層群',k:true},{t:'の',k:false},
+      {t:'含礫泥岩',k:true},{t:'が露出する一方、',k:false},
+      {t:'河岸',k:true},{t:'は厚い',k:false},{t:'崩積土',k:true},{t:'で被覆。',k:false},
+    ],
+    [
+      {t:'右岸切土法面',k:true},{t:'の泥岩で著しい',k:false},
+      {t:'スレーキング',k:true},{t:'が認められ、',k:false},
+      {t:'右岸斜面',k:true},{t:'には',k:false},{t:'小規模崩壊',k:true},{t:'で',k:false},
+      {t:'ガリー',k:true},{t:'が形成されている。',k:false},
+    ],
+    [
+      {t:'層序',k:true},{t:'は上部の',k:false},{t:'崩積土',k:true},{t:'と下位の',k:false},
+      {t:'含礫泥岩',k:true},{t:'で、',k:false},
+      {t:'泥岩の劈開・風化',k:true},{t:'により',k:false},
+      {t:'局所的脆弱化',k:true},{t:'が進行している。',k:false},
+    ],
+  ],
+  // ②
+  [
+    [
+      {t:'目的',k:true},{t:'は',k:false},
+      {t:'①河床部の支持力確認',k:true},{t:'、',k:false},
+      {t:'②袖部等の岩盤深度・分布範囲の広域把握',k:true},{t:'、',k:false},
+      {t:'③岩盤の掘削難易度推定',k:true},{t:'。',k:false},
+    ],
+    [
+      {t:'着目点',k:true},{t:'は',k:false},
+      {t:'崩積土による岩盤隠蔽',k:true},{t:'、',k:false},
+      {t:'スレーキングによる強度低下',k:true},{t:'、',k:false},
+      {t:'ガリーと降雨時の浸透経路',k:true},{t:'が',k:false},
+      {t:'斜面不安定化',k:true},{t:'を促す点。',k:false},
+    ],
+  ],
+  // ③
+  [
+    [
+      {t:'ボーリング',k:true},{t:'で',k:false},{t:'河床支持力',k:true},{t:'を確認し、',k:false},
+      {t:'地表踏査',k:true},{t:'と',k:false},{t:'簡易貫入試験',k:true},{t:'で',k:false},
+      {t:'岩盤深度',k:true},{t:'を',k:false},{t:'踏査地質図',k:true},{t:'に整理、',k:false},
+      {t:'簡易型弾性波試験',k:true},{t:'で',k:false},
+      {t:'支持力と掘削難易度',k:true},{t:'を推定。',k:false},
+    ],
+    [
+      {t:'複数手法の整合',k:true},{t:'により',k:false},
+      {t:'分布把握の信頼性',k:true},{t:'は高い。',k:false},
+    ],
+    [
+      {t:'ただし',k:false},
+      {t:'右岸ガリーの進展評価',k:true},{t:'、',k:false},
+      {t:'豪雨時の表流水動態',k:true},{t:'、',k:false},
+      {t:'崩積土内の局所弱層',k:true},{t:'は未解決で、',k:false},
+      {t:'地質リスク',k:true},{t:'は',k:false},
+      {t:'右岸斜面の崩壊拡大',k:true},{t:'と',k:false},
+      {t:'スレーキングによる劣化',k:true},{t:'が高い。',k:false},
+    ],
+    [
+      {t:'対策として',k:false},
+      {t:'計画位置を下流へ移動',k:true},{t:'し、',k:false},
+      {t:'袖部のはめ込み深度',k:true},{t:'を',k:false},
+      {t:'実測岩盤深度',k:true},{t:'に合わせることを提案する。',k:false},
+    ],
+  ],
+];
+
+let currentPage = 0;
+let pageRates = [50, 50, 50];
+let activeBlankSets = texts.map(page => page.map(() => []));
+let revealed = texts.map(page => page.map(() => new Set()));
+
+function getKeyIndices(pageIdx, lineIdx) {
+  return texts[pageIdx][lineIdx].map((s,i) => s.k ? i : -1).filter(i => i >= 0);
+}
+
+function pickBlanks(pageIdx, lineIdx, rate) {
+  const keys = getKeyIndices(pageIdx, lineIdx);
+  if (rate === 'all') return keys;
+  const count = Math.max(1, Math.round(keys.length * rate / 100));
+  const shuffled = [...keys].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count).sort((a,b) => a-b);
+}
+
+function renderText(pageIdx) {
+  const el = document.getElementById('text-' + pageIdx);
+  let html = '';
+  texts[pageIdx].forEach((lineSegs, lineIdx) => {
+    const actives = activeBlankSets[pageIdx][lineIdx];
+    const rev = revealed[pageIdx][lineIdx];
+    html += '<div class="text-line">';
+    lineSegs.forEach((seg, i) => {
+      if (actives.includes(i)) {
+        const isRev = rev.has(i);
+        html += `<span class="blank${isRev?' revealed':''}" onclick="toggle(${pageIdx},${lineIdx},${i})">${seg.t}</span>`;
+      } else {
+        html += `<span>${seg.t}</span>`;
+      }
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function toggle(pageIdx, lineIdx, i) {
+  const rev = revealed[pageIdx][lineIdx];
+  if (rev.has(i)) { rev.delete(i); } else { rev.add(i); }
+  renderText(pageIdx);
+}
+
+function setRate(rate) {
+  pageRates[currentPage] = rate;
+  document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+  if (rate === 50) document.getElementById('btn-rate-50').classList.add('active');
+  else if (rate === 'all') document.getElementById('btn-rate-all').classList.add('active');
+  for (let l = 0; l < texts[currentPage].length; l++) {
+    activeBlankSets[currentPage][l] = pickBlanks(currentPage, l, rate);
+    revealed[currentPage][l] = new Set();
+  }
+  renderText(currentPage);
+}
+
+function showAll() {
+  for (let l = 0; l < texts[currentPage].length; l++) {
+    const keys = getKeyIndices(currentPage, l);
+    activeBlankSets[currentPage][l] = keys;
+    keys.forEach(i => revealed[currentPage][l].add(i));
+  }
+  renderText(currentPage);
+}
+
+function updateRateBtns() {
+  const rate = pageRates[currentPage];
+  document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+  if (rate === 50) document.getElementById('btn-rate-50').classList.add('active');
+  else if (rate === 'all') document.getElementById('btn-rate-all').classList.add('active');
+}
+
+function showPage(idx) {
+  document.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('active', i === idx));
+  document.getElementById('card-complete').classList.remove('active');
+  document.getElementById('page-indicator').textContent = `${idx + 1} / 3`;
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').textContent = idx === 2 ? '完了 ✓' : '次へ →';
+  document.getElementById('btn-next').disabled = false;
+  updateRateBtns();
+}
+
+function prevCard() { if (currentPage > 0) { currentPage--; showPage(currentPage); } }
+
+function nextCard() {
+  if (currentPage < 2) { currentPage++; showPage(currentPage); }
+  else {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('card-complete').classList.add('active');
+    document.getElementById('page-indicator').textContent = '完了';
+    document.getElementById('btn-prev').disabled = true;
+    document.getElementById('btn-next').disabled = true;
+  }
+}
+
+function restart() {
+  currentPage = 0;
+  pageRates = [50, 50, 50];
+  revealed = texts.map(page => page.map(() => new Set()));
+  for (let p = 0; p < 3; p++) {
+    for (let l = 0; l < texts[p].length; l++) {
+      activeBlankSets[p][l] = pickBlanks(p, l, 50);
+    }
+    renderText(p);
+  }
+  showPage(0);
+}
+
+// 初期化
+for (let p = 0; p < 3; p++) {
+  for (let l = 0; l < texts[p].length; l++) {
+    activeBlankSets[p][l] = pickBlanks(p, l, 50);
+  }
+  renderText(p);
+}
+</script>
+</body>
+</html>
