@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>地質調査技士 R7予想問題</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --card2: #22253a;
+    --accent: #4f8ef7;
+    --accent2: #f7c94f;
+    --text: #e8eaf0;
+    --text2: #8a8fa8;
+    --correct: #4caf7d;
+    --wrong: #e05c5c;
+    --border: #2e3250;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Hiragino Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ヘッダー */
+  #header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  #header-title { font-size: 17px; font-weight: 700; color: var(--accent); }
+  #header .sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  #sync-toast {
+    font-size: 13px;
+    color: var(--text2);
+    display: none;
+    transition: opacity 0.3s;
+  }
+
+  /* 進捗バー */
+  #progress-bar-wrap {
+    background: var(--border);
+    height: 6px;
+  }
+  #progress-bar {
+    height: 6px;
+    background: var(--accent);
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* メインカード */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  /* カード番号・章ラベル */
+  #card-meta {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #card-meta .chapter-label {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  #card-meta .card-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* フラッシュカード画像 */
+  #card-img-wrap {
+    width: 100%;
+    max-width: 640px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    cursor: pointer;
+    position: relative;
+  }
+  #card-img-wrap img {
+    width: 100%;
+    display: block;
+  }
+  #card-img-wrap .tap-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 4px 10px;
+  }
+
+  /* ブックマークボタン */
+  #bookmark-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(0,0,0,0.55);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* ナビゲーションボタン */
+  #nav-row {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    gap: 10px;
+  }
+  #nav-row button {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  #nav-row button:active { transform: scale(0.97); opacity: 0.8; }
+  #btn-prev { background: var(--card2); color: var(--text2); }
+  #btn-next { background: var(--accent); color: #fff; }
+  #btn-next:disabled { background: var(--border); color: var(--text2); cursor: default; }
+
+  /* 正解・不正解ボタン */
+  #judge-row {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    gap: 10px;
+  }
+  #judge-row button {
+    flex: 1;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 19px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  #judge-row button:active { transform: scale(0.97); opacity: 0.8; }
+  #btn-correct { background: var(--correct); color: #fff; }
+  #btn-wrong { background: var(--wrong); color: #fff; }
+  .judge-selected { box-shadow: 0 0 0 3px white; }
+
+  /* スコアバー */
+  #score-bar {
+    width: 100%;
+    max-width: 640px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  #score-bar .item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  #score-bar .item .val { font-size: 20px; font-weight: 700; color: var(--text); }
+  #score-bar .item.c .val { color: var(--correct); }
+  #score-bar .item.w .val { color: var(--wrong); }
+
+  /* フィルターボタン */
+  #filter-row {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #filter-row button {
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--card2);
+    color: var(--text2);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  #filter-row button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* 章選択 */
+  #chapter-select-wrap {
+    width: 100%;
+    max-width: 640px;
+  }
+  #chapter-select-wrap select {
+    width: 100%;
+    padding: 13px 14px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  /* 完了画面 */
+  #finish-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 20px;
+    width: 100%;
+    max-width: 640px;
+    text-align: center;
+  }
+  #finish-screen h2 { font-size: 26px; color: var(--accent2); }
+  #finish-screen .score-big { font-size: 56px; font-weight: 700; color: var(--correct); }
+  #finish-screen .score-label { font-size: 16px; color: var(--text2); }
+  #btn-restart {
+    padding: 16px 36px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<div id="header">
+  <div>
+    <div id="header-title" class=""></div>
+    <div class="sub" id="header-sub"></div>
+  </div>
+  <div id="sync-toast">同期中...</div>
+</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div id="loading">読み込み中...</div>
+
+<div id="main" style="display:none">
+  <div id="card-meta">
+    <span class="chapter-label" id="chapter-label"></span>
+    <span class="card-num" id="card-num"></span>
+  </div>
+
+  <div id="card-img-wrap" onclick="handleCardTap()">
+    <button id="bookmark-btn" onclick="event.stopPropagation(); toggleBookmark()">☆</button>
+    <img id="card-img" src="" alt="カード">
+    <div class="tap-hint" id="tap-hint">タップで答え</div>
+  </div>
+
+  <div id="judge-row" style="display:none">
+    <button id="btn-correct" onclick="judge(true)">⭕ 正解</button>
+    <button id="btn-wrong" onclick="judge(false)">❌ 不正解</button>
+  </div>
+
+  <div id="nav-row">
+    <button id="btn-prev" onclick="go(-1)">◀ 前へ</button>
+    <button id="btn-next" onclick="go(1)">次へ ▶</button>
+  </div>
+
+  <div id="score-bar">
+    <div class="item">
+      <span class="val" id="sc-total">0</span>
+      <span>全体</span>
+    </div>
+    <div class="item c">
+      <span class="val" id="sc-correct">0</span>
+      <span>正解</span>
+    </div>
+    <div class="item w">
+      <span class="val" id="sc-wrong">0</span>
+      <span>不正解</span>
+    </div>
+    <div class="item">
+      <span class="val" id="sc-bookmark">0</span>
+      <span>★ブックマーク</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="item">
+      <span class="val" id="sc-pct">-</span>
+      <span>正答率</span>
+    </div>
+  </div>
+
+  <div id="chapter-select-wrap">
+    <select id="chapter-select" onchange="changeChapter()">
+      <option value="all">📚 全章（1〜6章）</option>
+      <option value="1">第1章：社会一般・行政・入札契約等（10問）</option>
+      <option value="2">第2章：地質・測量・土木・建築等の知識（10問）</option>
+      <option value="3">第3章：現場技術の知識（20問）</option>
+      <option value="4">第4章：調査技術の理解度（10問）</option>
+      <option value="5">第5章：解析手法・設計・施工への適用（10問）</option>
+      <option value="6">第6章：管理技法（10問）</option>
+    </select>
+  </div>
+
+  <div id="filter-row">
+    <button class="active" onclick="setFilter('all', this)">すべて</button>
+    <button onclick="setFilter('wrong', this)">❌ 不正解のみ</button>
+    <button onclick="setFilter('bookmark', this)">★ ブックマークのみ</button>
+    <button onclick="setFilter('unanswered', this)">未回答のみ</button>
+  </div>
+</div>
+
+<div id="finish-screen">
+  <h2>🎉 完了！</h2>
+  <div class="score-big" id="finish-score"></div>
+  <div class="score-label" id="finish-label"></div>
+  <button id="btn-restart" onclick="restart()">もう一度</button>
+</div>
+
+<script>
+// ===================== Firebase設定 =====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCsg7DIijPKjBYqnqgORvlaJRFZQzigd4E",
+  authDomain: "chishitsu-flashcard.firebaseapp.com",
+  databaseURL: "https://chishitsu-flashcard-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chishitsu-flashcard",
+  storageBucket: "chishitsu-flashcard.firebasestorage.app",
+  messagingSenderId: "31629157067",
+  appId: "1:31629157067:web:21ab0c0f2bf81f4d64f14e"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const DB_PATH = 'user/r7yosou';
+const dbRef = db.ref(DB_PATH);
+
+// ===================== 画像データ定義 =====================
+// GitHubのr7yosouフォルダに置くファイル名と対応
+// ファイル名: 001_第1章Q01_問題.jpg 〜 140_第6章A10_解答.jpg
+const BASE_URL = 'https://mimi82026.github.io/chishitsu-images/r7yosou/';
+
+// 各章の問題数
+const CH_COUNTS = {1:10, 2:10, 3:20, 4:10, 5:10, 6:10};
+const CH_NAMES = {
+  1:'第1章：社会一般・行政',
+  2:'第2章：地質・測量・土木',
+  3:'第3章：現場技術の知識',
+  4:'第4章：調査技術の理解度',
+  5:'第5章：解析手法・設計施工',
+  6:'第6章：管理技法'
+};
+
+// 全カードリスト生成（問題カードのみ - 解答はタップで表示）
+// card = { id, ch, qNum, qFile, aFile, label }
+const ALL_CARDS = [];
+let globalIdx = 1;
+for (let ch = 1; ch <= 6; ch++) {
+  const count = CH_COUNTS[ch];
+  for (let q = 1; q <= count; q++) {
+    const pad2 = String(globalIdx).padStart(3, '0');
+    const qPad = String(q).padStart(2, '0');
+    const qFile = `${pad2}_第${ch}章Q${qPad}_問題.jpg`;
+    const aFile = `${String(globalIdx+1).padStart(3,'0')}_第${ch}章A${qPad}_解答.jpg`;
+    ALL_CARDS.push({
+      id: `ch${ch}_q${q}`,
+      ch,
+      qNum: q,
+      qFile,
+      aFile,
+      label: `${CH_NAMES[ch]} Q${qPad}`
+    });
+    globalIdx += 2;
+  }
+}
+
+// ===================== 状態 =====================
+let results = {};       // { id: true/false/null }
+let bookmarks = {};     // { id: true }
+let resumeCardId = null;
+
+let currentFilter = 'all';
+let currentChapter = 'all';
+let deck = [];          // 現在の表示対象カードリスト
+let deckIdx = 0;        // deck内の位置
+let showingAnswer = false;
+
+// ===================== Firebase同期 =====================
+let toastTimer = null;
+function showToast(msg, color) {
+  const el = document.getElementById('sync-toast');
+  el.textContent = msg;
+  el.style.color = color || 'var(--text2)';
+  el.style.display = 'block';
+  el.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => { el.style.display = 'none'; }, 300);
+  }, 2500);
+}
+
+let fbLoaded = false;
+dbRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    // タイムスタンプで新しい方を優先
+    const localTs = parseInt(localStorage.getItem('r7yosou_ts') || '0');
+    const fbTs = data.ts || 0;
+    if (!fbLoaded || fbTs > localTs) {
+      results   = data.results   || {};
+      bookmarks = data.bookmarks || {};
+      resumeCardId = data.resumeCardId || null;
+      localStorage.setItem('r7yosou_ts', String(fbTs));
+      showToast('✅ 同期完了', 'var(--correct)');
+    }
+  }
+  if (!fbLoaded) {
+    fbLoaded = true;
+    initApp();
+  }
+}, (e) => {
+  showToast('⚠ オフラインで動作中', 'var(--text2)');
+  if (!fbLoaded) {
+    fbLoaded = true;
+    // ローカルストレージからフォールバック
+    try {
+      const local = JSON.parse(localStorage.getItem('r7yosou_data') || '{}');
+      results   = local.results   || {};
+      bookmarks = local.bookmarks || {};
+      resumeCardId = local.resumeCardId || null;
+    } catch(e) {}
+    initApp();
+  }
+});
+
+async function saveData() {
+  const ts = Date.now();
+  const payload = { results, bookmarks, resumeCardId, ts };
+  localStorage.setItem('r7yosou_data', JSON.stringify(payload));
+  localStorage.setItem('r7yosou_ts', String(ts));
+  try {
+    await dbRef.set(payload);
+    showToast('☁ 保存', 'var(--text2)');
+  } catch(e) {
+    showToast('⚠ ローカルのみ保存', 'var(--text2)');
+  }
+}
+
+// ===================== アプリ初期化 =====================
+function initApp() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = 'flex';
+  document.getElementById('header-title').textContent = '地質調査技士 R7予想問題';
+
+  buildDeck();
+
+  // 前回の続きから
+  if (resumeCardId) {
+    const idx = deck.findIndex(c => c.id === resumeCardId);
+    if (idx >= 0) deckIdx = idx;
+  }
+
+  renderCard();
+}
+
+// ===================== デッキ構築 =====================
+function buildDeck() {
+  let cards = ALL_CARDS;
+
+  // 章フィルター
+  if (currentChapter !== 'all') {
+    const ch = parseInt(currentChapter);
+    cards = cards.filter(c => c.ch === ch);
+  }
+
+  // 状態フィルター
+  if (currentFilter === 'wrong') {
+    cards = cards.filter(c => results[c.id] === false);
+  } else if (currentFilter === 'bookmark') {
+    cards = cards.filter(c => bookmarks[c.id]);
+  } else if (currentFilter === 'unanswered') {
+    cards = cards.filter(c => results[c.id] === undefined || results[c.id] === null);
+  }
+
+  deck = cards;
+  deckIdx = Math.min(deckIdx, Math.max(0, deck.length - 1));
+}
+
+// ===================== カード表示 =====================
+function renderCard() {
+  if (deck.length === 0) {
+    document.getElementById('card-img-wrap').style.display = 'none';
+    document.getElementById('judge-row').style.display = 'none';
+    document.getElementById('nav-row').style.display = 'none';
+    document.getElementById('card-meta').style.display = 'none';
+    document.getElementById('header-sub').textContent = '該当するカードがありません';
+    updateScore();
+    return;
+  }
+
+  document.getElementById('card-img-wrap').style.display = 'block';
+  document.getElementById('nav-row').style.display = 'flex';
+  document.getElementById('card-meta').style.display = 'flex';
+
+  showingAnswer = false;
+  document.getElementById('judge-row').style.display = 'none';
+  document.getElementById('tap-hint').textContent = 'タップで答え';
+
+  const card = deck[deckIdx];
+  resumeCardId = card.id;
+
+  // 画像セット（問題）
+  document.getElementById('card-img').src = BASE_URL + card.qFile;
+  document.getElementById('card-img').onerror = function() {
+    this.alt = '画像を読み込めませんでした。GitHubにr7yosouフォルダがあるか確認してください。';
+  };
+
+  // メタ情報
+  document.getElementById('chapter-label').textContent = CH_NAMES[card.ch];
+  document.getElementById('card-num').textContent = `${deckIdx + 1} / ${deck.length}`;
+  document.getElementById('header-sub').textContent = card.label;
+
+  // ブックマークボタン
+  document.getElementById('bookmark-btn').textContent = bookmarks[card.id] ? '★' : '☆';
+
+  // 正解・不正解ボタンのハイライト
+  const res = results[card.id];
+  document.getElementById('btn-correct').className = res === true  ? 'judge-selected' : '';
+  document.getElementById('btn-wrong').className   = res === false ? 'judge-selected' : '';
+
+  // 前へボタン
+  document.getElementById('btn-prev').disabled = deckIdx === 0;
+  document.getElementById('btn-next').disabled = deckIdx === deck.length - 1;
+
+  // プログレスバー
+  document.getElementById('progress-bar').style.width =
+    ((deckIdx + 1) / deck.length * 100) + '%';
+
+  updateScore();
+}
+
+// ===================== タップで答え表示 =====================
+function handleCardTap() {
+  if (!deck.length) return;
+  const card = deck[deckIdx];
+  if (!showingAnswer) {
+    showingAnswer = true;
+    document.getElementById('card-img').src = BASE_URL + card.aFile;
+    document.getElementById('judge-row').style.display = 'flex';
+    document.getElementById('tap-hint').textContent = 'タップで問題';
+  } else {
+    showingAnswer = false;
+    document.getElementById('card-img').src = BASE_URL + card.qFile;
+    document.getElementById('judge-row').style.display = 'none';
+    document.getElementById('tap-hint').textContent = 'タップで答え';
+  }
+}
+
+// ===================== 正解・不正解判定 =====================
+function judge(correct) {
+  if (!deck.length) return;
+  const card = deck[deckIdx];
+  results[card.id] = correct;
+  document.getElementById('btn-correct').className = correct ? 'judge-selected' : '';
+  document.getElementById('btn-wrong').className   = !correct ? 'judge-selected' : '';
+  updateScore();
+  saveData();
+
+  // 自動で次へ（少し遅延）
+  setTimeout(() => {
+    if (deckIdx < deck.length - 1) {
+      go(1);
+    } else {
+      showFinish();
+    }
+  }, 400);
+}
+
+// ===================== ナビゲーション =====================
+function go(dir) {
+  deckIdx += dir;
+  deckIdx = Math.max(0, Math.min(deckIdx, deck.length - 1));
+  renderCard();
+  saveData();
+}
+
+// ===================== ブックマーク =====================
+function toggleBookmark() {
+  if (!deck.length) return;
+  const card = deck[deckIdx];
+  if (bookmarks[card.id]) {
+    delete bookmarks[card.id];
+    document.getElementById('bookmark-btn').textContent = '☆';
+  } else {
+    bookmarks[card.id] = true;
+    document.getElementById('bookmark-btn').textContent = '★';
+  }
+  updateScore();
+  saveData();
+}
+
+// ===================== スコア更新 =====================
+function updateScore() {
+  const target = currentChapter === 'all'
+    ? ALL_CARDS
+    : ALL_CARDS.filter(c => c.ch === parseInt(currentChapter));
+
+  const total = target.length;
+  const correct = target.filter(c => results[c.id] === true).length;
+  const wrong   = target.filter(c => results[c.id] === false).length;
+  const bmCount = Object.keys(bookmarks).length;
+  const answered = correct + wrong;
+  const pct = answered > 0 ? Math.round(correct / answered * 100) + '%' : '-';
+
+  document.getElementById('sc-total').textContent   = total;
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent   = wrong;
+  document.getElementById('sc-bookmark').textContent = bmCount;
+  document.getElementById('sc-pct').textContent      = pct;
+}
+
+// ===================== フィルター変更 =====================
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('#filter-row button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  deckIdx = 0;
+  buildDeck();
+  renderCard();
+}
+
+// ===================== 章変更 =====================
+function changeChapter() {
+  currentChapter = document.getElementById('chapter-select').value;
+  deckIdx = 0;
+  buildDeck();
+  renderCard();
+}
+
+// ===================== 完了画面 =====================
+function showFinish() {
+  const target = deck;
+  const correct = target.filter(c => results[c.id] === true).length;
+  const total   = target.length;
+  const pct = total > 0 ? Math.round(correct / total * 100) : 0;
+
+  document.getElementById('finish-score').textContent = pct + '%';
+  document.getElementById('finish-label').textContent =
+    `${total}問中 ${correct}問正解`;
+
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('finish-screen').style.display = 'flex';
+}
+
+function restart() {
+  deckIdx = 0;
+  document.getElementById('finish-screen').style.display = 'none';
+  document.getElementById('main').style.display = 'flex';
+  renderCard();
+}
+</script>
+</body>
+</html>
