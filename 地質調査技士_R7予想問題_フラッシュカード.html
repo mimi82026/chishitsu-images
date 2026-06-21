@@ -31,7 +31,7 @@
   #header {
     background: var(--card);
     border-bottom: 1px solid var(--border);
-    padding: 10px 14px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,10 +39,10 @@
     top: 0;
     z-index: 100;
   }
-  #header h1 { font-size: 15px; font-weight: 700; color: var(--accent); }
-  #header .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  #header-title { font-size: 17px; font-weight: 700; color: var(--accent); }
+  #header .sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
   #sync-toast {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--text2);
     display: none;
     transition: opacity 0.3s;
@@ -51,10 +51,10 @@
   /* 進捗バー */
   #progress-bar-wrap {
     background: var(--border);
-    height: 4px;
+    height: 6px;
   }
   #progress-bar {
-    height: 4px;
+    height: 6px;
     background: var(--accent);
     transition: width 0.3s;
     width: 0%;
@@ -66,38 +66,36 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 12px;
-    gap: 12px;
+    padding: 12px 10px;
+    gap: 10px;
   }
 
   /* カード番号・章ラベル */
   #card-meta {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: var(--text2);
   }
   #card-meta .chapter-label {
     background: var(--card2);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 11px;
+    padding: 5px 14px;
+    font-size: 13px;
     color: var(--accent);
   }
   #card-meta .card-num {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text);
   }
 
   /* フラッシュカード画像 */
   #card-img-wrap {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     border-radius: 12px;
     overflow: hidden;
     background: var(--card);
@@ -112,26 +110,26 @@
   }
   #card-img-wrap .tap-hint {
     position: absolute;
-    bottom: 8px;
-    right: 10px;
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    background: rgba(0,0,0,0.4);
-    border-radius: 8px;
-    padding: 2px 7px;
+    bottom: 10px;
+    right: 12px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 4px 10px;
   }
 
   /* ブックマークボタン */
   #bookmark-btn {
     position: absolute;
-    top: 8px;
-    right: 10px;
-    background: rgba(0,0,0,0.5);
+    top: 10px;
+    right: 12px;
+    background: rgba(0,0,0,0.55);
     border: none;
     border-radius: 50%;
-    width: 34px;
-    height: 34px;
-    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -142,17 +140,17 @@
   /* ナビゲーションボタン */
   #nav-row {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     display: flex;
-    gap: 8px;
+    gap: 10px;
   }
   #nav-row button {
     flex: 1;
-    padding: 13px;
+    padding: 16px;
     border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
     cursor: pointer;
     transition: opacity 0.15s, transform 0.1s;
   }
@@ -164,16 +162,16 @@
   /* 正解・不正解ボタン */
   #judge-row {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     display: flex;
-    gap: 8px;
+    gap: 10px;
   }
   #judge-row button {
     flex: 1;
-    padding: 14px;
+    padding: 18px;
     border: none;
-    border-radius: 10px;
-    font-size: 15px;
+    border-radius: 12px;
+    font-size: 19px;
     font-weight: 700;
     cursor: pointer;
     transition: opacity 0.15s, transform 0.1s;
@@ -186,37 +184,37 @@
   /* スコアバー */
   #score-bar {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px 14px;
     display: flex;
-    gap: 16px;
+    gap: 10px;
+    justify-content: space-around;
     font-size: 12px;
     color: var(--text2);
   }
   #score-bar .item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  #score-bar .item .val { font-size: 18px; font-weight: 700; color: var(--text); }
+  #score-bar .item .val { font-size: 20px; font-weight: 700; color: var(--text); }
   #score-bar .item.c .val { color: var(--correct); }
   #score-bar .item.w .val { color: var(--wrong); }
-  #score-bar .spacer { flex: 1; }
 
   /* フィルターボタン */
   #filter-row {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     display: flex;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
   }
   #filter-row button {
-    padding: 6px 12px;
+    padding: 9px 16px;
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 22px;
     background: var(--card2);
     color: var(--text2);
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -229,16 +227,16 @@
   /* 章選択 */
   #chapter-select-wrap {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
   }
   #chapter-select-wrap select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 13px 14px;
     background: var(--card2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     color: var(--text);
-    font-size: 13px;
+    font-size: 15px;
   }
 
   /* 完了画面 */
@@ -246,22 +244,22 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    padding: 30px 20px;
+    gap: 20px;
+    padding: 40px 20px;
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     text-align: center;
   }
-  #finish-screen h2 { font-size: 22px; color: var(--accent2); }
-  #finish-screen .score-big { font-size: 48px; font-weight: 700; color: var(--correct); }
-  #finish-screen .score-label { font-size: 13px; color: var(--text2); }
+  #finish-screen h2 { font-size: 26px; color: var(--accent2); }
+  #finish-screen .score-big { font-size: 56px; font-weight: 700; color: var(--correct); }
+  #finish-screen .score-label { font-size: 16px; color: var(--text2); }
   #btn-restart {
-    padding: 14px 30px;
+    padding: 16px 36px;
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 12px;
-    font-size: 15px;
+    border-radius: 14px;
+    font-size: 17px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -272,7 +270,7 @@
     align-items: center;
     justify-content: center;
     color: var(--text2);
-    font-size: 14px;
+    font-size: 16px;
   }
 </style>
 </head>
