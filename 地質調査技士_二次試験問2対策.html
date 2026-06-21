@@ -165,7 +165,7 @@ header h1 { font-size: 14px; font-weight: 700; color: #7eb8f7; letter-spacing: 0
 
 <header>
   <h1>地質調査技士 二次試験問2対策</h1>
-  <span class="page-indicator" id="page-indicator">1 / 3</span>
+  <span class="page-indicator" id="page-indicator">1 / 6</span>
 </header>
 
 <div class="rate-bar">
@@ -177,19 +177,34 @@ header h1 { font-size: 14px; font-weight: 700; color: #7eb8f7; letter-spacing: 0
 
 <div class="cards-wrap">
   <div class="card active" id="card-0">
-    <div class="card-label">①-1 調査地の地形の特徴・①-2 地質層序および地質構造</div>
+    <div class="card-label">①-1・①-2 地形・地質層序および地質構造（151字）</div>
     <div class="card-theme">砂防ダム新設予定地の地形・地質</div>
     <div class="card-text" id="text-0"></div>
   </div>
   <div class="card" id="card-1">
-    <div class="card-label">② 調査の目的と着目点</div>
+    <div class="card-label">② 調査の目的と着目点（152字）</div>
     <div class="card-theme">調査目的・着目した地質的課題</div>
     <div class="card-text" id="text-1"></div>
   </div>
   <div class="card" id="card-2">
-    <div class="card-label">③-1 調査結果と信頼性・③-2 残課題と地質リスク</div>
+    <div class="card-label">③-1・③-2 調査結果と信頼性・残課題と地質リスク（163字）</div>
     <div class="card-theme">調査結果の整理と今後の課題</div>
     <div class="card-text" id="text-2"></div>
+  </div>
+  <div class="card" id="card-3">
+    <div class="card-label">①-1・①-2 地形・地質層序および地質構造（168字）</div>
+    <div class="card-theme">砂防ダム新設予定地の地形・地質（長文）</div>
+    <div class="card-text" id="text-3"></div>
+  </div>
+  <div class="card" id="card-4">
+    <div class="card-label">②-1・②-2 調査の目的・着目点・調査内容および結果（287字）</div>
+    <div class="card-theme">調査目的・着目した地質的課題（長文）</div>
+    <div class="card-text" id="text-4"></div>
+  </div>
+  <div class="card" id="card-5">
+    <div class="card-label">③-1・③-2 調査成果の信頼性・残課題と地質リスク（99字）</div>
+    <div class="card-theme">調査結果の整理と今後の課題（短文）</div>
+    <div class="card-text" id="text-5"></div>
   </div>
   <div class="complete-card" id="card-complete">
     <div class="complete-icon">✅</div>
@@ -205,35 +220,35 @@ header h1 { font-size: 14px; font-weight: 700; color: #7eb8f7; letter-spacing: 0
 </div>
 
 <script>
+const TOTAL = 6;
+
 const texts = [
-  // ①
+  // 0: ①151字
   [
     [
       {t:'地形',k:true},{t:'は',k:false},
       {t:'河岸',k:true},{t:'が厚い',k:false},
-      {t:'崩積土',k:true},{t:'に被覆された',k:false},
+      {t:'崩積土',k:true},{t:'に覆われた',k:false},
       {t:'小渓流',k:true},{t:'で、',k:false},
-      {t:'右岸斜面',k:true},{t:'には',k:false},
-      {t:'小規模崩壊',k:true},{t:'に伴う',k:false},
-      {t:'ガリー',k:true},{t:'が形成されている。',k:false},
+      {t:'右岸斜面',k:true},{t:'には不安定な',k:false},
+      {t:'ガリー',k:true},{t:'が形成されており、',k:false},
+      {t:'雨水の供給',k:true},{t:'によりさらなる',k:false},
+      {t:'崩壊',k:true},{t:'の恐れがある。',k:false},
     ],
     [
       {t:'地質層序',k:true},{t:'は',k:false},
       {t:'河床',k:true},{t:'に',k:false},
       {t:'瀬戸川層群',k:true},{t:'の',k:false},
-      {t:'含礫泥岩',k:true},{t:'が分布し、',k:false},
-      {t:'表層',k:true},{t:'を',k:false},
-      {t:'崩積土',k:true},{t:'が厚く覆っている。',k:false},
+      {t:'含礫泥岩',k:true},{t:'が分布しており、表層を',k:false},
+      {t:'崩積土',k:true},{t:'が覆っている。',k:false},
     ],
     [
       {t:'地質構造的特徴',k:true},{t:'として、',k:false},
       {t:'右岸側切土法面',k:true},{t:'の泥岩に著しい',k:false},
-      {t:'スレーキング',k:true},{t:'の進行が認められ、',k:false},
-      {t:'雨水の供給',k:true},{t:'により更なる',k:false},
-      {t:'崩壊',k:true},{t:'が誘発される恐れがある。',k:false},
+      {t:'スレーキング',k:true},{t:'の進行（風化・脆弱化）が認められる。',k:false},
     ],
   ],
-  // ②
+  // 1: ②152字
   [
     [
       {t:'目的',k:true},{t:'は',k:false},
@@ -254,7 +269,7 @@ const texts = [
       {t:'簡易型弾性波試験',k:true},{t:'を複合的に実施した。',k:false},
     ],
   ],
-  // ③
+  // 2: ③163字
   [
     [
       {t:'ボーリング',k:true},{t:'、',k:false},
@@ -269,15 +284,85 @@ const texts = [
       {t:'スレーキングによる岩盤劣化',k:true},{t:'が残る。',k:false},
     ],
     [
-      {t:'対策として',k:false},
+      {t:'対策として、',k:false},
       {t:'ダム計画位置を現行より下流側へ移動',k:true},{t:'すること、および',k:false},
       {t:'判明した岩盤深度に袖部のはめ込み深度を合わせる',k:true},{t:'ことを提案した。',k:false},
+    ],
+  ],
+  // 3: ①168字（長文）
+  [
+    [
+      {t:'地形',k:true},{t:'は',k:false},
+      {t:'河岸',k:true},{t:'が厚い',k:false},
+      {t:'崩積土',k:true},{t:'に被覆された',k:false},
+      {t:'小渓流',k:true},{t:'であり、',k:false},
+      {t:'右岸斜面',k:true},{t:'には不安定な',k:false},
+      {t:'ガリー',k:true},{t:'が形成されてさらなる崩壊の恐れがある。',k:false},
+    ],
+    [
+      {t:'地質層序',k:true},{t:'は、',k:false},
+      {t:'河床部',k:true},{t:'に',k:false},
+      {t:'瀬戸川層群',k:true},{t:'の',k:false},
+      {t:'含礫泥岩',k:true},{t:'が基盤岩として分布し、その上部を表層の',k:false},
+      {t:'崩積土',k:true},{t:'が不整合に覆っている。',k:false},
+    ],
+    [
+      {t:'地質構造的特徴',k:true},{t:'としては、',k:false},
+      {t:'右岸側の切土法面',k:true},{t:'に露出する泥岩において、著しい',k:false},
+      {t:'スレーキング',k:true},{t:'の進行（風化・脆弱化）が認められる。',k:false},
+    ],
+  ],
+  // 4: ②287字（長文）
+  [
+    [
+      {t:'目的',k:true},{t:'は',k:false},
+      {t:'砂防ダム設置位置における基礎岩盤の安定性評価',k:true},{t:'および',k:false},
+      {t:'適切な構造設計への反映',k:true},{t:'である。',k:false},
+    ],
+    [
+      {t:'地形地質に対する着目点',k:true},{t:'は、',k:false},
+      {t:'(1)河床部における基礎岩盤の支持力確認',k:true},{t:'、',k:false},
+      {t:'(2)厚い崩積土に遮られた両岸袖部における岩盤深度と分布範囲の空間的把握',k:true},{t:'、',k:false},
+      {t:'(3)スレーキングやガリーを考慮した掘削難易度の推定と斜面安定性評価',k:true},{t:'の３点とした。',k:false},
+    ],
+    [
+      {t:'調査として、',k:false},
+      {t:'河床部でボーリング',k:true},{t:'を実施し必要な支持力を直接確認した。',k:false},
+    ],
+    [
+      {t:'また、両袖部では',k:false},
+      {t:'地表踏査と簡易貫入試験',k:true},{t:'を併用し、',k:false},
+      {t:'岩盤深度を推定して踏査地質図に整理',k:true},{t:'した。',k:false},
+    ],
+    [
+      {t:'さらに、右岸法面と河床露頭で',k:false},
+      {t:'簡易型弾性波試験',k:true},{t:'を実施し、',k:false},
+      {t:'弾性波速度',k:true},{t:'から',k:false},
+      {t:'袖部岩盤の支持力特性および掘削難易度',k:true},{t:'を適確に推定した。',k:false},
+    ],
+  ],
+  // 5: ③99字（短文）
+  [
+    [
+      {t:'ボーリング',k:true},{t:'、',k:false},
+      {t:'簡易貫入',k:true},{t:'、',k:false},
+      {t:'弾性波試験',k:true},{t:'の結果が互いに整合したため',k:false},
+      {t:'信頼性',k:true},{t:'は高い。',k:false},
+    ],
+    [
+      {t:'地質リスク',k:true},{t:'として',k:false},
+      {t:'右岸ガリーの拡大・崩壊リスク',k:true},{t:'が残る。',k:false},
+    ],
+    [
+      {t:'対策に',k:false},
+      {t:'計画位置の下流への移動',k:true},{t:'、及び',k:false},
+      {t:'袖部のはめ込み深度の変更',k:true},{t:'を提案した。',k:false},
     ],
   ],
 ];
 
 let currentPage = 0;
-let pageRates = [50, 50, 50];
+let globalRate = 50;
 let activeBlankSets = texts.map(page => page.map(() => []));
 let revealed = texts.map(page => page.map(() => new Set()));
 
@@ -293,8 +378,19 @@ function pickBlanks(pageIdx, lineIdx, rate) {
   return shuffled.slice(0, count).sort((a,b) => a-b);
 }
 
+function applyRateToAll(rate) {
+  for (let p = 0; p < TOTAL; p++) {
+    for (let l = 0; l < texts[p].length; l++) {
+      activeBlankSets[p][l] = pickBlanks(p, l, rate);
+      revealed[p][l] = new Set();
+    }
+    renderText(p);
+  }
+}
+
 function renderText(pageIdx) {
   const el = document.getElementById('text-' + pageIdx);
+  if (!el) return;
   let html = '';
   texts[pageIdx].forEach((lineSegs, lineIdx) => {
     const actives = activeBlankSets[pageIdx][lineIdx];
@@ -320,47 +416,37 @@ function toggle(pageIdx, lineIdx, i) {
 }
 
 function setRate(rate) {
-  pageRates[currentPage] = rate;
+  globalRate = rate;
   document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
   if (rate === 50) document.getElementById('btn-rate-50').classList.add('active');
   else if (rate === 'all') document.getElementById('btn-rate-all').classList.add('active');
-  for (let l = 0; l < texts[currentPage].length; l++) {
-    activeBlankSets[currentPage][l] = pickBlanks(currentPage, l, rate);
-    revealed[currentPage][l] = new Set();
-  }
-  renderText(currentPage);
+  applyRateToAll(rate);
 }
 
 function showAll() {
-  for (let l = 0; l < texts[currentPage].length; l++) {
-    const keys = getKeyIndices(currentPage, l);
-    activeBlankSets[currentPage][l] = keys;
-    keys.forEach(i => revealed[currentPage][l].add(i));
+  for (let p = 0; p < TOTAL; p++) {
+    for (let l = 0; l < texts[p].length; l++) {
+      const keys = getKeyIndices(p, l);
+      activeBlankSets[p][l] = keys;
+      keys.forEach(i => revealed[p][l].add(i));
+    }
+    renderText(p);
   }
-  renderText(currentPage);
-}
-
-function updateRateBtns() {
-  const rate = pageRates[currentPage];
-  document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
-  if (rate === 50) document.getElementById('btn-rate-50').classList.add('active');
-  else if (rate === 'all') document.getElementById('btn-rate-all').classList.add('active');
 }
 
 function showPage(idx) {
   document.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('active', i === idx));
   document.getElementById('card-complete').classList.remove('active');
-  document.getElementById('page-indicator').textContent = `${idx + 1} / 3`;
+  document.getElementById('page-indicator').textContent = `${idx + 1} / ${TOTAL}`;
   document.getElementById('btn-prev').disabled = idx === 0;
-  document.getElementById('btn-next').textContent = idx === 2 ? '完了 ✓' : '次へ →';
+  document.getElementById('btn-next').textContent = idx === TOTAL - 1 ? '完了 ✓' : '次へ →';
   document.getElementById('btn-next').disabled = false;
-  updateRateBtns();
 }
 
 function prevCard() { if (currentPage > 0) { currentPage--; showPage(currentPage); } }
 
 function nextCard() {
-  if (currentPage < 2) { currentPage++; showPage(currentPage); }
+  if (currentPage < TOTAL - 1) { currentPage++; showPage(currentPage); }
   else {
     document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
     document.getElementById('card-complete').classList.add('active');
@@ -372,24 +458,16 @@ function nextCard() {
 
 function restart() {
   currentPage = 0;
-  pageRates = [50, 50, 50];
+  globalRate = 50;
   revealed = texts.map(page => page.map(() => new Set()));
-  for (let p = 0; p < 3; p++) {
-    for (let l = 0; l < texts[p].length; l++) {
-      activeBlankSets[p][l] = pickBlanks(p, l, 50);
-    }
-    renderText(p);
-  }
+  document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-rate-50').classList.add('active');
+  applyRateToAll(50);
   showPage(0);
 }
 
 // 初期化
-for (let p = 0; p < 3; p++) {
-  for (let l = 0; l < texts[p].length; l++) {
-    activeBlankSets[p][l] = pickBlanks(p, l, 50);
-  }
-  renderText(p);
-}
+applyRateToAll(50);
 </script>
 </body>
 </html>
