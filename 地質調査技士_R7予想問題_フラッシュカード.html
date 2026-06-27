@@ -339,13 +339,14 @@
 
   <div id="chapter-select-wrap">
     <select id="chapter-select" onchange="changeChapter()">
-      <option value="all">📚 全章（1〜6章）</option>
+      <option value="all">📚 全問（1〜6章＋追加問題）</option>
       <option value="1">第1章：社会一般・行政・入札契約等（10問）</option>
       <option value="2">第2章：地質・測量・土木・建築等の知識（10問）</option>
       <option value="3">第3章：現場技術の知識（20問）</option>
       <option value="4">第4章：調査技術の理解度（10問）</option>
       <option value="5">第5章：解析手法・設計・施工への適用（10問）</option>
       <option value="6">第6章：管理技法（10問）</option>
+      <option value="extra">➕ 追加問題（リスクアセスメント・工程表 9問）</option>
     </select>
   </div>
 
@@ -418,6 +419,34 @@ for (let ch = 1; ch <= 6; ch++) {
     globalIdx += 2;
   }
 }
+
+// ===================== 追加問題カード =====================
+// 化学物質リスクアセスメント（4問）
+const EXTRA_RISK = [
+  { qFile:'141_リスクアセスメントQ01_問題.jpg', aFile:'142_リスクアセスメントA01_解答.jpg', label:'追加：リスクアセスメント Q01' },
+  { qFile:'143_リスクアセスメントQ02_問題.jpg', aFile:'144_リスクアセスメントA02_解答.jpg', label:'追加：リスクアセスメント Q02' },
+  { qFile:'145_リスクアセスメントQ03_問題.jpg', aFile:'146_リスクアセスメントA03_解答.jpg', label:'追加：リスクアセスメント Q03' },
+  { qFile:'147_リスクアセスメントQ04_問題.jpg', aFile:'148_リスクアセスメントA04_解答.jpg', label:'追加：リスクアセスメント Q04' },
+];
+// 工程表（5問）
+const EXTRA_SCHEDULE = [
+  { qFile:'149_工程表Q01_問題.jpg', aFile:'150_工程表A01_解答.jpg', label:'追加：工程表 Q01' },
+  { qFile:'151_工程表Q02_問題.jpg', aFile:'152_工程表A02_解答.jpg', label:'追加：工程表 Q02' },
+  { qFile:'153_工程表Q03_問題.jpg', aFile:'154_工程表A03_解答.jpg', label:'追加：工程表 Q03' },
+  { qFile:'155_工程表Q04_問題.jpg', aFile:'156_工程表A04_解答.jpg', label:'追加：工程表 Q04' },
+  { qFile:'157_工程表Q05_問題.jpg', aFile:'158_工程表A05_解答.jpg', label:'追加：工程表 Q05' },
+];
+
+[...EXTRA_RISK, ...EXTRA_SCHEDULE].forEach((e, i) => {
+  ALL_CARDS.push({
+    id: `extra_${i+1}`,
+    ch: 'extra',
+    qNum: i + 1,
+    qFile: e.qFile,
+    aFile: e.aFile,
+    label: e.label
+  });
+});
 
 // ===================== 状態 =====================
 let results = {};       // { id: true/false/null }
@@ -515,8 +544,12 @@ function buildDeck() {
 
   // 章フィルター
   if (currentChapter !== 'all') {
-    const ch = parseInt(currentChapter);
-    cards = cards.filter(c => c.ch === ch);
+    if (currentChapter === 'extra') {
+      cards = cards.filter(c => c.ch === 'extra');
+    } else {
+      const ch = parseInt(currentChapter);
+      cards = cards.filter(c => c.ch === ch);
+    }
   }
 
   // 状態フィルター
@@ -562,7 +595,7 @@ function renderCard() {
   };
 
   // メタ情報
-  document.getElementById('chapter-label').textContent = CH_NAMES[card.ch];
+  document.getElementById('chapter-label').textContent = card.ch === 'extra' ? '➕ 追加問題' : CH_NAMES[card.ch];
   document.getElementById('card-num').textContent = `${deckIdx + 1} / ${deck.length}`;
   document.getElementById('header-sub').textContent = card.label;
 
@@ -649,7 +682,9 @@ function toggleBookmark() {
 function updateScore() {
   const target = currentChapter === 'all'
     ? ALL_CARDS
-    : ALL_CARDS.filter(c => c.ch === parseInt(currentChapter));
+    : currentChapter === 'extra'
+      ? ALL_CARDS.filter(c => c.ch === 'extra')
+      : ALL_CARDS.filter(c => c.ch === parseInt(currentChapter));
 
   const total = target.length;
   const correct = target.filter(c => results[c.id] === true).length;
